@@ -1,22 +1,22 @@
 import type { StyleSpecification } from "maplibre-gl";
 
-/** NEXA's own illustrated community-map style on free OpenMapTiles vector data (OpenFreeMap, no API key).
-    Pastel lavender/cream land, sage parks, pastel blue water, muted-purple roads, soft peach for institutions,
-    muted yellow for commercial areas, dark plum labels. Deliberately NOT a conventional navigation look. */
+/** NEXA's illustrated community-map style with cohesive lavender-pastel geographic colors. */
 export const PALETTE = {
-  land: "#f4efff",
-  residential: "#ece5fb",
-  commercial: "#fff2bf",
-  institution: "#ffe0d6",
-  park: "#cfe5cf",
-  water: "#bde0f3",
-  building: "#e0d6f6",
-  roadCasing: "#d5caf3",
-  roadMajor: "#a08ce6",
-  roadMid: "#b7a7ec",
-  roadMinor: "#ffffff",
-  label: "#2b2046",
-  halo: "#f8f5ff",
+  land: "#F7F5FC",
+  residential: "#EAE5F5",
+  commercial: "#F5E4D9",
+  institution: "#F5EDCE", // Community spaces
+  park: "#DCECE2",        // Parks / greenery
+  water: "#D7EAF5",       // Water
+  building: "#F0ECF8",    // Dense urban areas
+  roadCasing: "#947FCB",  // Road outlines
+  roadMajor: "#B9A8E6",   // Major roads
+  roadMid: "#B9A8E6",
+  roadMinor: "#FFFFFF",   // Local roads
+  boundary: "#D9D3E5",    // Boundaries
+  label: "#373342",       // Geographic labels
+  labelSecondary: "#777183", // Secondary labels
+  halo: "#F7F5FC",
 };
 
 const FONT_REG = ["Noto Sans Regular"];
@@ -48,12 +48,13 @@ export const nexaMapStyle = {
     { id: "water", type: "fill", source: "om", "source-layer": "water", paint: { "fill-color": PALETTE.water } },
     { id: "waterway", type: "line", source: "om", "source-layer": "waterway", paint: { "line-color": PALETTE.water, "line-width": 2 } },
     { id: "building", type: "fill", source: "om", "source-layer": "building", minzoom: 14, paint: { "fill-color": PALETTE.building, "fill-opacity": 0.9 } },
+    { id: "boundary", type: "line", source: "om", "source-layer": "boundary", paint: { "line-color": PALETTE.boundary, "line-width": 1 } },
     ...road("road-minor", ["minor", "service", "path", "track"], PALETTE.roadMinor, [3, 9]),
     ...road("road-mid", ["tertiary", "secondary"], PALETTE.roadMid, [4, 13]),
     ...road("road-major", ["primary", "trunk", "motorway"], PALETTE.roadMajor, [5, 16]),
-    { id: "road-name", type: "symbol", source: "om", "source-layer": "transportation_name", minzoom: 15, layout: { "symbol-placement": "line", "text-field": ["get", "name"], "text-font": FONT_REG, "text-size": 11 }, paint: { "text-color": PALETTE.label, "text-halo-color": PALETTE.halo, "text-halo-width": 1.5 } },
-    { id: "water-name", type: "symbol", source: "om", "source-layer": "water_name", layout: { "text-field": ["get", "name"], "text-font": FONT_REG, "text-size": 12, "text-letter-spacing": 0.1 }, paint: { "text-color": "#2d5d7a", "text-halo-color": PALETTE.halo, "text-halo-width": 1.5 } },
+    { id: "road-name", type: "symbol", source: "om", "source-layer": "transportation_name", minzoom: 15, layout: { "symbol-placement": "line", "text-field": ["get", "name"], "text-font": FONT_REG, "text-size": 11 }, paint: { "text-color": PALETTE.labelSecondary, "text-halo-color": PALETTE.halo, "text-halo-width": 1.5 } },
+    { id: "water-name", type: "symbol", source: "om", "source-layer": "water_name", layout: { "text-field": ["get", "name"], "text-font": FONT_REG, "text-size": 12, "text-letter-spacing": 0.1 }, paint: { "text-color": "#285C7C", "text-halo-color": PALETTE.halo, "text-halo-width": 1.5 } },
     { id: "place-major", type: "symbol", source: "om", "source-layer": "place", filter: ["in", "class", "city", "town", "suburb"], layout: { "text-field": ["get", "name"], "text-font": FONT_BOLD, "text-size": ["interpolate", ["linear"], ["zoom"], 8, 12, 14, 16], "text-transform": "uppercase", "text-letter-spacing": 0.08 }, paint: { "text-color": PALETTE.label, "text-halo-color": PALETTE.halo, "text-halo-width": 2 } },
-    { id: "place-minor", type: "symbol", source: "om", "source-layer": "place", filter: ["in", "class", "neighbourhood", "village", "quarter"], layout: { "text-field": ["get", "name"], "text-font": FONT_REG, "text-size": 12 }, paint: { "text-color": PALETTE.label, "text-halo-color": PALETTE.halo, "text-halo-width": 1.5 } },
+    { id: "place-minor", type: "symbol", source: "om", "source-layer": "place", filter: ["in", "class", "neighbourhood", "village", "quarter"], layout: { "text-field": ["get", "name"], "text-font": FONT_REG, "text-size": 12 }, paint: { "text-color": PALETTE.labelSecondary, "text-halo-color": PALETTE.halo, "text-halo-width": 1.5 } },
   ],
 } as unknown as StyleSpecification;

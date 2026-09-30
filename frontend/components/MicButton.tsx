@@ -10,7 +10,11 @@ export function MicButton({ onTranscript, onInterim, className }: { onTranscript
   const [err, setErr] = useState<string | null>(null);
   const l = useRef<Listener | null>(null);
   const supported = useSpeechSupport();
-  useEffect(() => () => l.current?.stop(), []);
+  useEffect(() => {
+    return () => {
+      l.current?.stop();
+    };
+  }, []);
 
   function toggle() {
     if (on) return l.current?.stop();

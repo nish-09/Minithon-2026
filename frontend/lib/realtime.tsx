@@ -91,5 +91,7 @@ export function useLiveEvents(onEvent: Handler, deps: unknown[] = []) {
     ref.current = onEvent;
   });
   const key = JSON.stringify(deps);
-  useEffect(() => subscribe((e) => ref.current(e)), [subscribe, key]);
+  useEffect(() => {
+    return subscribe((e) => ref.current(e));
+  }, [subscribe, key]);
 }

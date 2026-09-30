@@ -1,5 +1,5 @@
 "use client";
-import { Bell, BookOpen, Home, Map as MapIcon, Mic, PenLine, ShieldCheck, UserRound, Users } from "lucide-react";
+import { Bell, BookOpen, Home, LogOut, Map as MapIcon, Menu, Mic, PanelLeftClose, PanelLeftOpen, PenLine, ShieldCheck, UserRound, Users, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
@@ -36,6 +36,51 @@ export function AppShell({ children }: { children: ReactNode }) {
   const incident = incidentQ.data?.incident ?? null;
   const [voiceOpen, setVoiceOpen] = useState(false);
   const [voiceText, setVoiceText] = useState<string | undefined>(undefined);
+  const [collapsed, setCollapsed] = useState(false);
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+
+  // Restore sidebar collapsed preference
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("nexa_sidebar_collapsed");
+      if (saved !== null) {
+        setCollapsed(saved === "true");
+      }
+    } catch {
+      // LocalStorage access safe fallback
+    }
+  }, []);
+
+  const toggleCollapse = useCallback(() => {
+    setCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem("nexa_sidebar_collapsed", String(next));
+      } catch {}
+      return next;
+    });
+  }, []);
+
+  // Keyboard shortcut Ctrl+B / Cmd+B to toggle sidebar collapse; Escape to close mobile drawer
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "b") {
+        e.preventDefault();
+        toggleCollapse();
+      }
+      if (e.key === "Escape") {
+        setMobileDrawerOpen(false);
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [toggleCollapse]);
+
+  // Close mobile drawer on route navigation
+  useEffect(() => {
+    setMobileDrawerOpen(false);
+  }, [path]);
+
   const openVoice = useCallback((t?: string) => {
     setVoiceText(t);
     setVoiceOpen(true);
@@ -82,37 +127,123 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <VoiceCtx.Provider value={{ open: openVoice }}>
-    <div className="min-h-screen text-ink lg:grid lg:grid-cols-[270px_1fr]">
+    <div className="min-h-screen text-ink lg:flex">
       <a href="#main" className="sr-only-focusable clay-btn fixed left-2 top-2 z-[3000] bg-brand px-4 py-3 text-brandink">
         Skip to content
       </a>
-      {/* desktop sidebar */}
-      <aside className="clay-card hidden !rounded-[28px] lg:m-3 lg:flex lg:flex-col lg:p-5" aria-label="Primary">
-        <Link href="/" className="mb-1 text-2xl font-extrabold tracking-tight text-brandtext">
-          NEXA
-        </Link>
-        <p className="mb-6 text-xs text-muted">Your neighborhood, when you need it most.</p>
-        <nav className="flex-1 space-y-1">
+
+      {/* desktop sidebar: fixed/sticky so it never scrolls off screen, and fast collapsable */}
+      <aside
+        className={cx(
+          "clay-card hidden lg:sticky lg:top-3 lg:self-start lg:m-3 lg:flex lg:flex-col",
+          "lg:h-[calc(100vh-1.5rem)] lg:overflow-hidden z-20 shrink-0 transition-[width,padding] duration-150 ease-out",
+          collapsed ? "w-[76px] p-2.5 items-center" : "w-[260px] p-5"
+        )}
+        aria-label="Primary"
+      >
+        {/* Brand Header */}
+        <div className={cx("shrink-0 w-full mb-3", collapsed ? "flex justify-center pt-1" : "px-1")}>
+          {!collapsed ? (
+            <div>
+              <Link href="/" className="text-2xl font-extrabold tracking-tight text-brandtext hover:opacity-85 transition-opacity block">
+                NEXA
+              </Link>
+              <p className="mt-0.5 text-xs text-muted">Your neighborhood, when you need it most.</p>
+            </div>
+          ) : (
+            <Link
+              href="/"
+              className="clay-btn bg-lavender grid h-11 w-11 place-items-center !rounded-2xl text-lg font-black text-brandtext shadow-sm hover:scale-105 transition-transform"
+              title="NEXA Home"
+              aria-label="NEXA Home"
+            >
+              N
+            </Link>
+          )}
+        </div>
+
+        {/* Navigation list */}
+        <nav className={cx("flex-1 space-y-1.5 overflow-y-auto overflow-x-hidden min-h-0 py-1 custom-scrollbar w-full", !collapsed && "mt-2")}>
           {nav.map((n) => (
-            <Link key={n.href} href={n.href} aria-current={active(n.href) ? "page" : undefined} className={cx("flex min-h-12 items-center gap-3 rounded-2xl px-3 font-bold transition", active(n.href) ? "clay-btn bg-lavender" : "border border-transparent text-ink transition-colors duration-150 hover:bg-white/60")}>
-              <n.icon aria-hidden size={20} />
-              {n.label}
+            <Link
+              key={n.href}
+              href={n.href}
+              aria-current={active(n.href) ? "page" : undefined}
+              title={collapsed ? n.label : undefined}
+              aria-label={collapsed ? n.label : undefined}
+              className={cx(
+                "flex min-h-12 items-center rounded-2xl font-bold transition-colors duration-150",
+                collapsed ? "justify-center p-2 mx-auto w-11 h-11" : "gap-3 px-3 w-full",
+                active(n.href) ? "clay-btn bg-lavender text-ink" : "border border-transparent text-ink hover:bg-white/60"
+              )}
+            >
+              <n.icon aria-hidden size={20} className="shrink-0" />
+              {!collapsed && <span className="truncate">{n.label}</span>}
             </Link>
           ))}
         </nav>
-        <div className="mt-4 flex items-center gap-3 border-t-2 border-line pt-4">
-          <Avatar name={user.name} src={user.avatar_url} size={36} />
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold">{user.name}</p>
-            <button onClick={() => void logout().then(() => router.replace("/login"))} className="min-h-11 text-sm font-semibold text-brandtext underline">
-              Log out
-            </button>
-          </div>
+
+        {/* User profile footer */}
+        <div className={cx("mt-auto border-t-2 border-line pt-3 shrink-0 w-full", collapsed ? "flex flex-col items-center gap-2" : "flex items-center gap-3 px-1")}>
+          {!collapsed ? (
+            <>
+              <div className="shrink-0">
+                <Avatar name={user.name} src={user.avatar_url} size={36} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold">{user.name}</p>
+                <button
+                  type="button"
+                  onClick={() => void logout().then(() => router.replace("/login"))}
+                  className="min-h-6 text-sm font-semibold text-brandtext underline hover:opacity-80"
+                >
+                  Log out
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div title={user.name}>
+                <Avatar name={user.name} src={user.avatar_url} size={34} />
+              </div>
+              <button
+                type="button"
+                onClick={() => void logout().then(() => router.replace("/login"))}
+                title="Log out"
+                aria-label="Log out"
+                className="grid h-9 w-9 place-items-center rounded-xl text-muted hover:bg-white/60 hover:text-brandtext transition-colors"
+              >
+                <LogOut aria-hidden size={18} />
+              </button>
+            </>
+          )}
         </div>
       </aside>
 
-      <div className="flex min-w-0 flex-col pb-24 lg:pb-0">
+      <div className="flex-1 min-w-0 flex flex-col pb-24 lg:pb-0">
         <header className="clay-card sticky top-3 z-[1000] mx-3 mt-3 flex items-center gap-3 !rounded-[22px] !p-0 px-4 py-2.5">
+          {/* Mobile navigation trigger */}
+          <button
+            type="button"
+            onClick={() => setMobileDrawerOpen(true)}
+            className="clay-btn clay-btn-secondary grid h-11 w-11 shrink-0 place-items-center !rounded-full text-ink hover:bg-white/80 active:scale-95 transition-all lg:hidden"
+            aria-label="Open navigation menu"
+            title="Open navigation menu"
+          >
+            <Menu aria-hidden size={20} />
+          </button>
+
+          {/* Desktop sidebar collapse/expand trigger */}
+          <button
+            type="button"
+            onClick={toggleCollapse}
+            className="clay-btn clay-btn-secondary hidden h-11 w-11 shrink-0 place-items-center !rounded-full text-ink hover:bg-white/80 active:scale-95 transition-all lg:grid"
+            aria-label={collapsed ? "Expand sidebar (Ctrl+B)" : "Collapse sidebar (Ctrl+B)"}
+            title={collapsed ? "Expand sidebar (Ctrl+B)" : "Collapse sidebar (Ctrl+B)"}
+          >
+            {collapsed ? <PanelLeftOpen aria-hidden size={19} /> : <PanelLeftClose aria-hidden size={19} />}
+          </button>
+
           <Link href="/" className="text-xl font-extrabold tracking-tight text-brandtext lg:hidden">
             NEXA
           </Link>
@@ -154,6 +285,66 @@ export function AppShell({ children }: { children: ReactNode }) {
           </Link>
         ))}
       </nav>
+
+      {/* mobile slide-over drawer */}
+      {mobileDrawerOpen && (
+        <div className="fixed inset-0 z-[2000] lg:hidden" role="dialog" aria-modal="true" aria-label="Navigation drawer">
+          <div
+            className="fixed inset-0 bg-ink/40 backdrop-blur-xs transition-opacity"
+            onClick={() => setMobileDrawerOpen(false)}
+            aria-hidden="true"
+          />
+          <aside className="clay-card fixed inset-y-2 left-2 z-[2001] flex w-72 max-w-[85vw] flex-col !rounded-[28px] p-5 shadow-2xl">
+            <div className="flex items-center justify-between">
+              <Link href="/" onClick={() => setMobileDrawerOpen(false)} className="text-2xl font-extrabold tracking-tight text-brandtext">
+                NEXA
+              </Link>
+              <button
+                type="button"
+                onClick={() => setMobileDrawerOpen(false)}
+                className="clay-btn clay-btn-secondary grid h-9 w-9 place-items-center !rounded-xl text-muted hover:text-ink"
+                aria-label="Close navigation menu"
+              >
+                <X aria-hidden size={18} />
+              </button>
+            </div>
+            <p className="mt-0.5 mb-4 text-xs text-muted">Your neighborhood, when you need it most.</p>
+
+            <nav className="flex-1 space-y-1.5 overflow-y-auto overflow-x-hidden min-h-0 py-2 custom-scrollbar">
+              {nav.map((n) => (
+                <Link
+                  key={n.href}
+                  href={n.href}
+                  onClick={() => setMobileDrawerOpen(false)}
+                  aria-current={active(n.href) ? "page" : undefined}
+                  className={cx(
+                    "flex min-h-12 items-center gap-3 rounded-2xl px-3 font-bold transition",
+                    active(n.href) ? "clay-btn bg-lavender text-ink" : "border border-transparent text-ink transition-colors duration-150 hover:bg-white/60"
+                  )}
+                >
+                  <n.icon aria-hidden size={20} />
+                  {n.label}
+                </Link>
+              ))}
+            </nav>
+
+            <div className="mt-auto border-t-2 border-line pt-4 flex items-center gap-3">
+              <Avatar name={user.name} src={user.avatar_url} size={36} />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold">{user.name}</p>
+                <button
+                  type="button"
+                  onClick={() => void logout().then(() => router.replace("/login"))}
+                  className="min-h-6 text-sm font-semibold text-brandtext underline"
+                >
+                  Log out
+                </button>
+              </div>
+            </div>
+          </aside>
+        </div>
+      )}
+
       <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">{announce}</div>
       <VoicePanel open={voiceOpen} onClose={() => setVoiceOpen(false)} initialText={voiceText} />
     </div>

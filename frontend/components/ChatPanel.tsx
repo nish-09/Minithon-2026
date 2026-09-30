@@ -25,7 +25,9 @@ export function ChatPanel({ requestId, disabled }: { requestId: number; disabled
   useLiveEvents((e) => {
     if (e.type === "message" && e.request_id === requestId) void reload();
   }, [requestId]);
-  useEffect(() => end.current?.scrollIntoView({ block: "end" }), [data?.length]);
+  useEffect(() => {
+    end.current?.scrollIntoView({ block: "end" });
+  }, [data?.length]);
 
   async function send(e: React.FormEvent) {
     e.preventDefault();

@@ -35,7 +35,9 @@ export function VoicePanel({ open, onClose, initialText }: { open: boolean; onCl
   const endRef = useRef<HTMLDivElement>(null);
   const supported = useSpeechSupport();
 
-  useEffect(() => endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }), [bubbles, interim]);
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [bubbles, interim]);
   useEffect(() => {
     if (!open) {
       listener.current?.stop();

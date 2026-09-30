@@ -11,37 +11,37 @@
    ========================================================================== */
 :root {
   /* palette */
-  --bg: #ddebff;            /* main page */
-  --bg-alt: #e4e7ff;        /* supporting page tone */
-  --surface: #f7faff;       /* neutral clay */
-  --surface-2: #eaf1ff;     /* recessed wells, inputs */
-  --lavender: #c9a7ff;
-  --yellow: #ffe58a;
-  --mint: #9ff3d0;
-  --peach: #ffb8a8;
-  --sky: #9dd9ff;
+  --bg: #F5F2FA;            /* main page */
+  --bg-alt: #EAE5F5;        /* supporting page tone */
+  --surface: #FFFFFF;       /* neutral clay */
+  --surface-2: #F0ECF8;     /* recessed wells, inputs */
+  --lavender: #B9A8E6;
+  --yellow: #F5EDCE;
+  --mint: #B5DEC9;
+  --peach: #F4B7A8;
+  --sky: #B7DDF2;
 
   /* text */
-  --ink: #172033;           /* primary */
-  --muted: #526078;         /* secondary (AA on every surface) */
-  --faint: #71809a;         /* timestamps/metadata on decoration only (below AA: never the only carrier of meaning) */
+  --ink: #302B3D;           /* primary */
+  --muted: #716B7D;         /* secondary (AA on every surface) */
+  --faint: #777183;         /* timestamps/metadata on decoration only (below AA: never the only carrier of meaning) */
 
   /* roles (existing component classes keep working through these) */
-  --line: #c9d6ee;          /* decorative dividers */
-  --line-strong: #6b7a99;   /* control borders, >= 3:1 */
+  --line: #E6E1EE;          /* decorative dividers */
+  --line-strong: #777183;   /* control borders, >= 3:1 */
   --brand: var(--lavender);
   --brand-ink: var(--ink);
-  --brand-text: #4a2fb0;    /* readable violet for links / selected text */
-  --brand-soft: #eadfff;
-  --accent: #0a5a8a;
+  --brand-text: #63449F;    /* readable violet for links / selected text */
+  --brand-soft: #EAE5F5;
+  --accent: #285C7C;
   --accent-soft: var(--sky);
-  --ok: #0b6b32;
+  --ok: #287A53;
   --ok-soft: var(--mint);
-  --ok-solid: #0b6b32;      /* filled with white text (rare) */
-  --warn: #7a4200;
+  --ok-solid: #287A53;      /* filled with white text */
+  --warn: #98671A;
   --warn-soft: var(--yellow);
-  --warn-solid: #a84300;
-  --danger: #9b1c1c;
+  --warn-solid: #A76C19;
+  --danger: #B94F55;
   --danger-soft: var(--peach);
   --danger-solid: #b42318;  /* destructive / SOS, white text */
   --focus: #172033;
@@ -145,7 +145,7 @@ body::after { width: 300px; height: 300px; left: -100px; bottom: 60px; backgroun
     box-shadow: var(--clay-recess);
     transition: box-shadow 0.18s var(--ease), border-color 0.18s var(--ease), background 0.18s var(--ease);
   }
-  .clay-input:focus { background: #fff; border-color: #4a2fb0; box-shadow: var(--clay-recess), 0 0 0 4px var(--glow); }
+  .clay-input:focus { background: #fff; border-color: #63449F; box-shadow: var(--clay-recess), 0 0 0 4px var(--glow); }
 
   /* ---- buttons: raised, hover lifts 1px, press sinks 1px ---- */
   .clay-btn {
@@ -188,13 +188,13 @@ body::after { width: 300px; height: 300px; left: -100px; bottom: 60px; backgroun
 .emergency-panel *, .emergency-strip *, .emergency-btn, .emergency-btn-secondary { animation: none !important; }
 
 /* ---- custom pastel map (MapLibre) ---- */
-.maplibregl-map { font-family: inherit; border-radius: 22px; background: #e4e7ff; }
-.maplibregl-ctrl-attrib { background: rgb(255 255 255 / 0.92) !important; color: #172033 !important; }
-.maplibregl-ctrl-attrib a { color: #0b4f9e !important; }
+.maplibregl-map { font-family: inherit; border-radius: 22px; background: #F7F5FC; }
+.maplibregl-ctrl-attrib { background: rgb(255 255 255 / 0.92) !important; color: #302B3D !important; }
+.maplibregl-ctrl-attrib a { color: #285C7C !important; }
 .nexa-marker { display: flex; align-items: center; justify-content: center; gap: 4px; min-width: 44px; min-height: 44px; padding: 0; background: transparent; border: 0; cursor: pointer; }
 .nexa-marker .shape {
   display: grid; place-items: center; width: 34px; height: 34px;
-  border: 3px solid #fff; color: #fff; font-size: 16px; font-weight: 800; line-height: 1;
+  border: 3px solid #fff; color: inherit; font-size: 16px; font-weight: 800; line-height: 1;
   box-shadow: 3px 4px 8px rgb(23 32 51 / 0.35), inset 2px 2px 4px rgb(255 255 255 / 0.4), inset -2px -3px 5px rgb(0 0 0 / 0.22);
 }
 .nexa-marker .tag { position: absolute; top: 40px; left: 50%; transform: translateX(-50%); white-space: nowrap; background: #fff; color: #172033; border: 2px solid #172033; border-radius: 999px; padding: 1px 8px; font-size: 11px; font-weight: 800; }
@@ -210,3 +210,22 @@ body::after { width: 300px; height: 300px; left: -100px; bottom: 60px; backgroun
 .shape-pin > span { transform: rotate(45deg); }
 
 .sr-only-focusable:not(:focus) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+/* custom sleek scrollbar for sidebar nav */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--line);
+  border-radius: 999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: var(--line-strong);
+}

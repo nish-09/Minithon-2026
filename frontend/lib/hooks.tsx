@@ -81,7 +81,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 export const useToast = () => useContext(ToastCtx);
 
 /* ---------- geolocation ---------- */
-export const SAMPLE_LOCATION = { lat: 12.9352, lng: 77.6245, label: "Koramangala, Bengaluru (sample)" };
+export const SAMPLE_LOCATION = { lat: 19.0645, lng: 72.8358, label: "TSEC Bandra West, Mumbai (sample)" };
 
 export type GeoStatus = "idle" | "asking" | "granted" | "denied" | "unavailable" | "error";
 

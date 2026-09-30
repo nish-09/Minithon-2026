@@ -109,7 +109,7 @@ function AnalyticsTab() {
   if (a.error || !a.data) return <ErrorState message={a.error ?? "No data"} onRetry={a.reload} />;
   const x = a.data;
   const hm = x.heatmap;
-  const center: [number, number] = hm.length ? [hm.reduce((s, h) => s + h.lat, 0) / hm.length, hm.reduce((s, h) => s + h.lng, 0) / hm.length] : [12.9352, 77.6245];
+  const center: [number, number] = hm.length ? [hm.reduce((s, h) => s + h.lat, 0) / hm.length, hm.reduce((s, h) => s + h.lng, 0) / hm.length] : [19.0645, 72.8358];
   return (
     <div className="space-y-5">
       <Field label="Period">{(id) => <Select id={id} value={days} onChange={(e) => setDays(Number(e.target.value))} className="max-w-48"><option value={7}>Last 7 days</option><option value={30}>Last 30 days</option><option value={90}>Last 90 days</option></Select>}</Field>

@@ -9,10 +9,10 @@ describe("NEXA custom map style", () => {
   });
 
   it("uses the pastel community palette, not a conventional navigation look", () => {
-    expect(PALETTE.land).toBe("#f4efff"); // lavender/cream land
-    expect(PALETTE.water).toBe("#bde0f3"); // pastel blue
-    expect(PALETTE.park).toBe("#cfe5cf"); // pastel sage
-    expect(PALETTE.label).toBe("#2b2046"); // dark plum labels
+    expect(PALETTE.land).toBe("#F7F5FC"); // lavender/cream land
+    expect(PALETTE.water).toBe("#D7EAF5"); // pastel blue
+    expect(PALETTE.park).toBe("#DCECE2"); // pastel sage
+    expect(PALETTE.label).toBe("#373342"); // dark plum labels
     expect(new Set(nexaMapStyle.layers.map((l) => l.id)).size).toBe(nexaMapStyle.layers.length); // unique ids
   });
 

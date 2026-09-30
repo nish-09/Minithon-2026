@@ -23,15 +23,15 @@ export interface MapHeat {
   label?: string;
 }
 
-const KIND: Record<MarkerKind, { shape: string; color: string; glyph: string; name: string; tag?: string }> = {
-  me: { shape: "pin", color: "#1f1b3a", glyph: "●", name: "Your location", tag: "YOU" },
-  request: { shape: "circle", color: "#5b34d6", glyph: "?", name: "Help request" },
-  urgent: { shape: "diamond", color: "#a84300", glyph: "!", name: "Urgent request", tag: "URGENT" },
-  critical: { shape: "octagon", color: "#a51818", glyph: "!", name: "Critical incident", tag: "CRITICAL" },
-  helper: { shape: "square", color: "#0b6b32", glyph: "✓", name: "Available helper" },
-  circle: { shape: "star", color: "#7a1f8f", glyph: "♥", name: "Trusted Circle member" },
-  service: { shape: "hex", color: "#075e8f", glyph: "+", name: "Community service" },
-  event: { shape: "square", color: "#5a2a82", glyph: "★", name: "Community activity" },
+const KIND: Record<MarkerKind, { shape: string; color: string; iconColor?: string; glyph: string; name: string; tag?: string }> = {
+  me: { shape: "pin", color: "#F2DCA6", iconColor: "#76531D", glyph: "●", name: "Your location", tag: "YOU" },
+  request: { shape: "circle", color: "#F4B7A8", iconColor: "#793C35", glyph: "?", name: "Help request" },
+  urgent: { shape: "diamond", color: "#a84300", iconColor: "#ffffff", glyph: "!", name: "Urgent request", tag: "URGENT" },
+  critical: { shape: "octagon", color: "#a51818", iconColor: "#ffffff", glyph: "!", name: "Critical incident", tag: "CRITICAL" },
+  helper: { shape: "square", color: "#B5DEC9", iconColor: "#17633F", glyph: "✓", name: "Available helper" },
+  circle: { shape: "star", color: "#D6C2F1", iconColor: "#613A96", glyph: "♥", name: "Trusted Circle member" },
+  service: { shape: "hex", color: "#B7DDF2", iconColor: "#285C7C", glyph: "+", name: "Community service" },
+  event: { shape: "square", color: "#D6C2F1", iconColor: "#613A96", glyph: "★", name: "Community activity" },
 };
 
 function markerEl(m: MapMarker): HTMLButtonElement {
@@ -43,6 +43,7 @@ function markerEl(m: MapMarker): HTMLButtonElement {
   const shape = document.createElement("span");
   shape.className = `shape shape-${k.shape}`;
   shape.style.background = k.color;
+  shape.style.color = k.iconColor || "#fff";
   const icon = document.createElement("span");
   icon.textContent = m.kind === "request" || m.kind === "service" || m.kind === "event" ? (m.icon ?? k.glyph) : k.glyph;
   icon.setAttribute("aria-hidden", "true");
