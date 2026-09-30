@@ -1,0 +1,123 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+/* Design tokens. Normal mode is calm indigo/teal; `.emergency` switches the subtree to a distinct
+   red-on-dark state so an incident never looks like a routine request. */
+:root {
+  --bg: #f5f6fb;
+  --surface: #ffffff;
+  --surface-2: #eef0f8;
+  --ink: #0f172a;
+  --muted: #5b6478;
+  --line: #e1e5f0;
+  --brand: #4f46e5;
+  --brand-ink: #ffffff;
+  --brand-text: #4f46e5; /* brand colour for TEXT/links (filled brand uses --brand) */
+  --brand-soft: #e8e9ff;
+  --accent: #0891b2;
+  --ok: #15803d;
+  --ok-soft: #dcfce7;
+  --warn: #b45309;
+  --warn-soft: #fef3c7;
+  --danger: #dc2626;
+  --danger-soft: #fee2e2;
+  --danger-solid: #dc2626; /* filled buttons, always paired with white text */
+  --ok-solid: #15803d;
+  --shadow: 0 1px 2px rgb(15 23 42 / 0.06), 0 8px 24px -12px rgb(15 23 42 / 0.18);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0a0f1f;
+    --surface: #121a31;
+    --surface-2: #1a2342;
+    --ink: #e8ebf7;
+    --muted: #9aa4c0;
+    --line: #253058;
+    --brand: #818cf8;
+    --brand-ink: #0a0f1f;
+    --brand-text: #818cf8;
+    --brand-soft: #232a57;
+    --accent: #22d3ee;
+    --ok: #4ade80;
+    --ok-soft: #12351f;
+    --warn: #fbbf24;
+    --warn-soft: #3a2a0a;
+    --danger: #f87171;
+    --danger-soft: #3b1216;
+    --danger-solid: #dc2626;
+    --ok-solid: #15803d;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px -12px rgb(0 0 0 / 0.6);
+  }
+}
+
+.emergency {
+  --bg: #1a0507;
+  --surface: #2a0b0f;
+  --surface-2: #3a1016;
+  --ink: #fff1f1;
+  --muted: #f3b4b4;
+  --line: #5b1a22;
+  --brand: #dc2626;
+  --brand-ink: #ffffff;
+  --brand-text: #fca5a5;
+  --brand-soft: #4a1218;
+  --accent: #fb7185;
+  --ok: #4ade80;
+  --ok-soft: #12351f;
+  --warn: #fbbf24;
+  --warn-soft: #3a2a0a;
+  --danger: #f87171;
+  --danger-soft: #4a1218;
+  --danger-solid: #c81e1e;
+  --ok-solid: #15803d;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-brand: var(--brand);
+  --color-brandink: var(--brand-ink);
+  --color-brandtext: var(--brand-text);
+  --color-brandsoft: var(--brand-soft);
+  --color-accent: var(--accent);
+  --color-ok: var(--ok);
+  --color-oksoft: var(--ok-soft);
+  --color-warn: var(--warn);
+  --color-warnsoft: var(--warn-soft);
+  --color-danger: var(--danger);
+  --color-dangersoft: var(--danger-soft);
+  --color-dangersolid: var(--danger-solid);
+  --color-oksolid: var(--ok-solid);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --shadow-card: var(--shadow);
+}
+
+html { color-scheme: light dark; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif; }
+
+/* visible focus for keyboard users everywhere */
+:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; border-radius: 6px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+@keyframes nexa-pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--brand) 55%, transparent); } 100% { box-shadow: 0 0 0 28px transparent; } }
+.pulse-ring { animation: nexa-pulse 1.6s ease-out infinite; }
+@keyframes nexa-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.rise { animation: nexa-rise .28s ease-out both; }
+
+.leaflet-container { font-family: inherit; border-radius: 1rem; background: var(--surface-2); }
+.nexa-pin { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50% 50% 50% 4px; transform: rotate(-45deg); border: 2px solid #fff; box-shadow: 0 2px 8px rgb(0 0 0 / .35); }
+.nexa-pin > span { transform: rotate(45deg); font-size: 16px; line-height: 1; }
+
+.sr-only-focusable:not(:focus) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+.leaflet-container .leaflet-control-attribution { background: rgb(255 255 255 / 0.92); color: #334155; }
+.leaflet-container .leaflet-control-attribution a { color: #0b4f9e; }

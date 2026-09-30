@@ -1,0 +1,6 @@
+-r requirements.txt
+pytest==9.1.1
+pytest-timeout==2.4.0
+ruff==0.16.9
+# optional: throw-away embedded PostgreSQL for running the tests against a real Postgres
+pixeltable-pgserver==0.6.0
