@@ -1,76 +1,64 @@
 @import "tailwindcss";
-@import "leaflet/dist/leaflet.css";
+@import "maplibre-gl/dist/maplibre-gl.css";
 
-/* Design tokens. Normal mode is calm indigo/teal; `.emergency` switches the subtree to a distinct
-   red-on-dark state so an incident never looks like a routine request. */
+/* ==========================================================================
+   NEXA design system: BRIGHT CLAYMORPHISM
+   Cool light page (~60%), soft clay surfaces (~30%), pastel accents (~10%), dark navy type.
+   - All colours are tokens here; components never hard-code palette values.
+   - tests/contrast.test.ts verifies every text/UI pair (AA: 4.5:1 text, 3:1 UI).
+   - Depth is decoration; meaning always comes from text + icon + shape too.
+   - Emergency components (.emergency-*) deliberately stay flat and high-contrast: clarity > softness.
+   ========================================================================== */
 :root {
-  --bg: #f5f6fb;
-  --surface: #ffffff;
-  --surface-2: #eef0f8;
-  --ink: #0f172a;
-  --muted: #5b6478;
-  --line: #e1e5f0;
-  --brand: #4f46e5;
-  --brand-ink: #ffffff;
-  --brand-text: #4f46e5; /* brand colour for TEXT/links (filled brand uses --brand) */
-  --brand-soft: #e8e9ff;
-  --accent: #0891b2;
-  --ok: #15803d;
-  --ok-soft: #dcfce7;
-  --warn: #b45309;
-  --warn-soft: #fef3c7;
-  --danger: #dc2626;
-  --danger-soft: #fee2e2;
-  --danger-solid: #dc2626; /* filled buttons, always paired with white text */
-  --ok-solid: #15803d;
-  --shadow: 0 1px 2px rgb(15 23 42 / 0.06), 0 8px 24px -12px rgb(15 23 42 / 0.18);
-}
+  /* palette */
+  --bg: #ddebff;            /* main page */
+  --bg-alt: #e4e7ff;        /* supporting page tone */
+  --surface: #f7faff;       /* neutral clay */
+  --surface-2: #eaf1ff;     /* recessed wells, inputs */
+  --lavender: #c9a7ff;
+  --yellow: #ffe58a;
+  --mint: #9ff3d0;
+  --peach: #ffb8a8;
+  --sky: #9dd9ff;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0a0f1f;
-    --surface: #121a31;
-    --surface-2: #1a2342;
-    --ink: #e8ebf7;
-    --muted: #9aa4c0;
-    --line: #253058;
-    --brand: #818cf8;
-    --brand-ink: #0a0f1f;
-    --brand-text: #818cf8;
-    --brand-soft: #232a57;
-    --accent: #22d3ee;
-    --ok: #4ade80;
-    --ok-soft: #12351f;
-    --warn: #fbbf24;
-    --warn-soft: #3a2a0a;
-    --danger: #f87171;
-    --danger-soft: #3b1216;
-    --danger-solid: #dc2626;
-    --ok-solid: #15803d;
-    --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px -12px rgb(0 0 0 / 0.6);
-  }
-}
+  /* text */
+  --ink: #172033;           /* primary */
+  --muted: #526078;         /* secondary (AA on every surface) */
+  --faint: #71809a;         /* timestamps/metadata on decoration only (below AA: never the only carrier of meaning) */
 
-.emergency {
-  --bg: #1a0507;
-  --surface: #2a0b0f;
-  --surface-2: #3a1016;
-  --ink: #fff1f1;
-  --muted: #f3b4b4;
-  --line: #5b1a22;
-  --brand: #dc2626;
-  --brand-ink: #ffffff;
-  --brand-text: #fca5a5;
-  --brand-soft: #4a1218;
-  --accent: #fb7185;
-  --ok: #4ade80;
-  --ok-soft: #12351f;
-  --warn: #fbbf24;
-  --warn-soft: #3a2a0a;
-  --danger: #f87171;
-  --danger-soft: #4a1218;
-  --danger-solid: #c81e1e;
-  --ok-solid: #15803d;
+  /* roles (existing component classes keep working through these) */
+  --line: #c9d6ee;          /* decorative dividers */
+  --line-strong: #6b7a99;   /* control borders, >= 3:1 */
+  --brand: var(--lavender);
+  --brand-ink: var(--ink);
+  --brand-text: #4a2fb0;    /* readable violet for links / selected text */
+  --brand-soft: #eadfff;
+  --accent: #0a5a8a;
+  --accent-soft: var(--sky);
+  --ok: #0b6b32;
+  --ok-soft: var(--mint);
+  --ok-solid: #0b6b32;      /* filled with white text (rare) */
+  --warn: #7a4200;
+  --warn-soft: var(--yellow);
+  --warn-solid: #a84300;
+  --danger: #9b1c1c;
+  --danger-soft: var(--peach);
+  --danger-solid: #b42318;  /* destructive / SOS, white text */
+  --focus: #172033;
+  --focus-halo: #ffffff;
+  --glow: rgb(123 97 255 / 0.35);
+
+  /* soft, cool-toned, low-opacity depth */
+  --sh-dark: rgb(92 110 140 / 0.16);
+  --sh-light: rgb(255 255 255 / 0.8);
+  --clay-radius: 24px;
+  --clay-out: 8px 8px 18px var(--sh-dark), -6px -6px 14px var(--sh-light);
+  --clay-out-sm: 4px 4px 10px var(--sh-dark), -3px -3px 8px var(--sh-light);
+  --clay-out-lg: 12px 14px 28px rgb(92 110 140 / 0.2), -8px -8px 18px var(--sh-light);
+  --clay-in: inset 2px 2px 4px rgb(255 255 255 / 0.85), inset -2px -3px 7px rgb(92 110 140 / 0.1);
+  --clay-recess: inset 3px 3px 7px rgb(92 110 140 / 0.17), inset -3px -3px 7px rgb(255 255 255 / 0.85);
+  --clay-pressed: inset 3px 3px 8px rgb(92 110 140 / 0.3), inset -2px -2px 5px rgb(255 255 255 / 0.4);
+  --ease: cubic-bezier(0.22, 0.8, 0.3, 1);
 }
 
 @theme inline {
@@ -79,45 +67,146 @@
   --color-surface2: var(--surface-2);
   --color-ink: var(--ink);
   --color-muted: var(--muted);
+  --color-faint: var(--faint);
   --color-line: var(--line);
+  --color-linestrong: var(--line-strong);
   --color-brand: var(--brand);
   --color-brandink: var(--brand-ink);
   --color-brandtext: var(--brand-text);
   --color-brandsoft: var(--brand-soft);
   --color-accent: var(--accent);
+  --color-accentsoft: var(--accent-soft);
   --color-ok: var(--ok);
   --color-oksoft: var(--ok-soft);
+  --color-oksolid: var(--ok-solid);
   --color-warn: var(--warn);
   --color-warnsoft: var(--warn-soft);
+  --color-warnsolid: var(--warn-solid);
   --color-danger: var(--danger);
   --color-dangersoft: var(--danger-soft);
   --color-dangersolid: var(--danger-solid);
-  --color-oksolid: var(--ok-solid);
+  --color-lavender: var(--lavender);
+  --color-yellow: var(--yellow);
+  --color-mint: var(--mint);
+  --color-peach: var(--peach);
+  --color-sky: var(--sky);
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
-  --shadow-card: var(--shadow);
+  --shadow-card: var(--clay-out);
 }
 
-html { color-scheme: light dark; }
-body { background: var(--bg); color: var(--ink); font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif; }
+html { color-scheme: light; }
+body {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(900px 480px at 8% -8%, #eef4ff 0%, transparent 60%),
+    radial-gradient(800px 500px at 100% 0%, var(--bg-alt) 0%, transparent 60%);
+  background-attachment: fixed;
+  color: var(--ink);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+}
+/* very subtle decorative clay blobs (decoration only, never behind dense content) */
+body::before, body::after { content: ""; position: fixed; z-index: -1; border-radius: 50%; pointer-events: none; }
+body::before { width: 340px; height: 340px; right: -110px; top: 120px; background: radial-gradient(circle at 35% 30%, rgb(201 167 255 / 0.28), rgb(201 167 255 / 0) 70%); }
+body::after { width: 300px; height: 300px; left: -100px; bottom: 60px; background: radial-gradient(circle at 35% 30%, rgb(159 243 208 / 0.3), rgb(159 243 208 / 0) 70%); }
 
-/* visible focus for keyboard users everywhere */
-:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; border-radius: 6px; }
+/* Focus: dark navy ring + white halo stays visible on every surface. Never removed. */
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px var(--focus-halo);
+  border-radius: 12px;
+}
+
+@layer components {
+  /* ---- surfaces ---- */
+  .clay-card {
+    background: var(--surface);
+    border-radius: var(--clay-radius);
+    box-shadow: var(--clay-out), var(--clay-in);
+    border: 1px solid rgb(255 255 255 / 0.7);
+  }
+  .clay-card-hover { transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease); }
+  .clay-card-hover:hover { transform: translateY(-2px); box-shadow: var(--clay-out-lg), var(--clay-in); }
+  .clay-flat, .clay-well { background: var(--surface-2); border-radius: 16px; box-shadow: var(--clay-recess); }
+  .tone-yellow { background: var(--yellow); }
+  .tone-lavender { background: var(--lavender); }
+  .tone-mint { background: var(--mint); }
+  .tone-peach { background: var(--peach); }
+  .tone-sky { background: var(--sky); }
+  /* secondary text on saturated pastels would fall below AA, so those surfaces render it in full ink */
+  .tone-lavender, .tone-sky, .tone-peach { --muted: var(--ink); }
+
+  /* ---- inputs ---- */
+  .clay-input {
+    background: var(--surface-2);
+    border: 2px solid var(--line-strong);
+    border-radius: 16px;
+    box-shadow: var(--clay-recess);
+    transition: box-shadow 0.18s var(--ease), border-color 0.18s var(--ease), background 0.18s var(--ease);
+  }
+  .clay-input:focus { background: #fff; border-color: #4a2fb0; box-shadow: var(--clay-recess), 0 0 0 4px var(--glow); }
+
+  /* ---- buttons: raised, hover lifts 1px, press sinks 1px ---- */
+  .clay-btn {
+    border-radius: 16px;
+    font-weight: 700;
+    color: var(--ink);
+    border: 1px solid rgb(255 255 255 / 0.55);
+    box-shadow: var(--clay-out-sm), inset 2px 2px 4px rgb(255 255 255 / 0.55), inset -2px -3px 6px rgb(92 110 140 / 0.14);
+    transition: transform 0.15s var(--ease), box-shadow 0.15s var(--ease), filter 0.15s var(--ease);
+  }
+  .clay-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 6px 7px 14px var(--sh-dark), -4px -4px 10px var(--sh-light), inset 2px 2px 4px rgb(255 255 255 / 0.55), inset -2px -3px 6px rgb(92 110 140 / 0.14); }
+  .clay-btn:active:not(:disabled) { transform: translateY(1px); box-shadow: var(--clay-pressed); }
+  .clay-btn:disabled { box-shadow: none; filter: saturate(0.6); }
+  .clay-btn-secondary { background: var(--surface); border: 2px solid var(--line-strong); box-shadow: var(--clay-out-sm), var(--clay-in); }
+  .clay-pill { border-radius: 999px; box-shadow: var(--clay-out-sm), var(--clay-in); }
+
+  /* ---- skeleton loading (layout-preserving) ---- */
+  .skeleton { background: linear-gradient(90deg, var(--surface-2) 0%, #f7faff 50%, var(--surface-2) 100%); background-size: 200% 100%; border-radius: 14px; box-shadow: var(--clay-recess); animation: nexa-shimmer 1.6s ease-in-out infinite; }
+
+  /* ---- emergency components: clarity over decoration (flat, white, thick border, >= 7:1 text) ---- */
+  .emergency-panel { background: #ffffff; color: #1a0000; border: 4px solid #8f1111; border-radius: 20px; box-shadow: none; }
+  .emergency-strip { background: #7f0f0f; color: #ffffff; border-radius: 16px; }
+  .emergency-btn { background: #8f1111; color: #ffffff; border: 3px solid #4d0606; border-radius: 18px; font-weight: 800; box-shadow: 0 4px 0 #4d0606; transition: transform 0.08s ease, box-shadow 0.08s ease; }
+  .emergency-btn:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 0 0 #4d0606; }
+  .emergency-btn-secondary { background: #ffffff; color: #1a0000; border: 3px solid #1a0000; border-radius: 18px; font-weight: 800; box-shadow: 0 4px 0 #1a0000; transition: transform 0.08s ease, box-shadow 0.08s ease; }
+  .emergency-btn-secondary:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 0 0 #1a0000; }
+}
+
+/* ---- motion: soft and physical (120-350ms ease-out), off for reduced-motion, none in emergencies ---- */
+@keyframes nexa-pulse { 0% { box-shadow: 0 0 0 0 rgb(123 97 255 / 0.4); } 100% { box-shadow: 0 0 0 20px rgb(123 97 255 / 0); } }
+.pulse-ring { animation: nexa-pulse 1.8s ease-out infinite; }
+@keyframes nexa-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.rise { animation: nexa-rise 0.28s var(--ease) both; }
+@keyframes nexa-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  *, *::before, *::after { animation: none !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+  .clay-btn:hover:not(:disabled), .clay-btn:active:not(:disabled), .clay-card-hover:hover { transform: none; }
 }
+.emergency-panel *, .emergency-strip *, .emergency-btn, .emergency-btn-secondary { animation: none !important; }
 
-@keyframes nexa-pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--brand) 55%, transparent); } 100% { box-shadow: 0 0 0 28px transparent; } }
-.pulse-ring { animation: nexa-pulse 1.6s ease-out infinite; }
-@keyframes nexa-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-.rise { animation: nexa-rise .28s ease-out both; }
-
-.leaflet-container { font-family: inherit; border-radius: 1rem; background: var(--surface-2); }
-.nexa-pin { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50% 50% 50% 4px; transform: rotate(-45deg); border: 2px solid #fff; box-shadow: 0 2px 8px rgb(0 0 0 / .35); }
-.nexa-pin > span { transform: rotate(45deg); font-size: 16px; line-height: 1; }
+/* ---- custom pastel map (MapLibre) ---- */
+.maplibregl-map { font-family: inherit; border-radius: 22px; background: #e4e7ff; }
+.maplibregl-ctrl-attrib { background: rgb(255 255 255 / 0.92) !important; color: #172033 !important; }
+.maplibregl-ctrl-attrib a { color: #0b4f9e !important; }
+.nexa-marker { display: flex; align-items: center; justify-content: center; gap: 4px; min-width: 44px; min-height: 44px; padding: 0; background: transparent; border: 0; cursor: pointer; }
+.nexa-marker .shape {
+  display: grid; place-items: center; width: 34px; height: 34px;
+  border: 3px solid #fff; color: #fff; font-size: 16px; font-weight: 800; line-height: 1;
+  box-shadow: 3px 4px 8px rgb(23 32 51 / 0.35), inset 2px 2px 4px rgb(255 255 255 / 0.4), inset -2px -3px 5px rgb(0 0 0 / 0.22);
+}
+.nexa-marker .tag { position: absolute; top: 40px; left: 50%; transform: translateX(-50%); white-space: nowrap; background: #fff; color: #172033; border: 2px solid #172033; border-radius: 999px; padding: 1px 8px; font-size: 11px; font-weight: 800; }
+.nexa-marker:focus-visible { outline: 3px solid #172033; outline-offset: 2px; box-shadow: 0 0 0 6px #fff; border-radius: 12px; }
+.shape-circle { border-radius: 50%; }
+.shape-diamond { border-radius: 6px; transform: rotate(45deg); }
+.shape-diamond > span { transform: rotate(-45deg); }
+.shape-square { border-radius: 8px; }
+.shape-octagon { clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%); border: 0 !important; width: 38px !important; height: 38px !important; }
+.shape-hex { clip-path: polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0 50%); border: 0 !important; width: 38px !important; height: 38px !important; }
+.shape-star { clip-path: polygon(50% 0, 62% 35%, 98% 35%, 69% 57%, 80% 92%, 50% 71%, 20% 92%, 31% 57%, 2% 35%, 38% 35%); border: 0 !important; width: 40px !important; height: 40px !important; }
+.shape-pin { border-radius: 50% 50% 50% 4px; transform: rotate(-45deg); }
+.shape-pin > span { transform: rotate(45deg); }
 
 .sr-only-focusable:not(:focus) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-
-.leaflet-container .leaflet-control-attribution { background: rgb(255 255 255 / 0.92); color: #334155; }
-.leaflet-container .leaflet-control-attribution a { color: #0b4f9e; }

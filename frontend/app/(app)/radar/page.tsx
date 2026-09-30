@@ -10,7 +10,6 @@ import { SAMPLE_LOCATION, useLocation, useQuery } from "@/lib/hooks";
 import { useLiveEvents } from "@/lib/realtime";
 import type { CommunityEventItem, DirectoryItem, HelperMarker, RadarItem, Reference } from "@/lib/types";
 
-const URG_COLOR = { normal: "#4f46e5", urgent: "#d97706", critical: "#dc2626" } as const;
 
 export default function RadarPage() {
   const { user } = useAuth();
@@ -28,6 +27,8 @@ export default function RadarPage() {
   const reqs = useQuery(c ? () => api<RadarItem[]>(`/api/requests/radar?${qs}${category ? `&category=${category}` : ""}${urgency ? `&urgency=${urgency}` : ""}`) : null, [qs, category, urgency]);
   const helpers = useQuery(c ? () => api<HelperMarker[]>(`/api/helpers/nearby?${qs}${skill ? `&skill=${skill}` : ""}&min_trust=${minTrust}`) : null, [qs, skill, minTrust]);
   const events = useQuery(c ? () => api<CommunityEventItem[]>(`/api/events?${qs}`) : null, [qs]);
+  const circleQ = useQuery(() => api<{ groups: Record<string, { user: { id: number } }[]> }>("/api/trusted-circle"), []);
+  const circleIds = useMemo(() => new Set(Object.values(circleQ.data?.groups ?? {}).flat().map((e) => e.user.id)), [circleQ.data]);
   const services = useQuery(c && layers.services ? () => api<DirectoryItem[]>(`/api/directory?${qs}`) : null, [qs, layers.services]);
 
   useLiveEvents((e) => {
@@ -36,13 +37,13 @@ export default function RadarPage() {
 
   const markers = useMemo<MapMarker[]>(() => {
     const m: MapMarker[] = [];
-    if (c) m.push({ id: "me", lat: c.lat, lng: c.lng, emoji: "📍", color: "#0f172a", label: "You" });
-    if (layers.requests) for (const r of reqs.data ?? []) m.push({ id: `r${r.id}`, lat: r.lat, lng: r.lng, emoji: r.icon, color: URG_COLOR[r.urgency], label: r.label, detail: `${r.urgency} · ${fmtDistance(r.distance_km)} · approximate area`, pulse: r.urgency === "critical" });
-    if (layers.helpers) for (const h of helpers.data ?? []) m.push({ id: `h${h.id}`, lat: h.lat, lng: h.lng, emoji: "🧑‍🤝‍🧑", color: "#16a34a", label: h.verified ? "Verified helper" : "Helper", detail: `${fmtDistance(h.distance_km)}${h.trust_score != null ? ` · trust ${Math.round(h.trust_score)}` : ""}${h.skills.length ? ` · ${h.skills.join(", ").replace(/_/g, " ")}` : ""}` });
-    if (layers.events) for (const e of events.data ?? []) m.push({ id: `e${e.id}`, lat: e.lat, lng: e.lng, emoji: "🎉", color: "#9333ea", label: e.title, detail: new Date(e.starts_at).toLocaleString() });
-    if (layers.services) for (const s of (services.data ?? []).filter((x) => x.lat != null)) m.push({ id: `s${s.id}`, lat: s.lat!, lng: s.lng!, emoji: s.category === "hospital" ? "🏥" : s.category === "pharmacy" ? "💊" : "🔧", color: "#0891b2", label: s.name, detail: s.phone ?? undefined });
+    if (c) m.push({ id: "me", lat: c.lat, lng: c.lng, kind: "me", label: "Your location" });
+    if (layers.requests) for (const r of reqs.data ?? []) m.push({ id: `r${r.id}`, lat: r.lat, lng: r.lng, kind: r.urgency === "critical" ? "critical" : r.urgency === "urgent" ? "urgent" : "request", icon: r.icon, label: r.label, detail: `${r.urgency} priority · ${fmtDistance(r.distance_km)} · approximate area` });
+    if (layers.helpers) for (const h of helpers.data ?? []) m.push({ id: `h${h.id}`, lat: h.lat, lng: h.lng, kind: circleIds.has(h.id) ? "circle" : "helper", label: circleIds.has(h.id) ? "Trusted Circle member" : h.verified ? "Verified helper" : "Helper", detail: `${fmtDistance(h.distance_km)}${h.trust_score != null ? ` · trust ${Math.round(h.trust_score)}` : ""}${h.skills.length ? ` · ${h.skills.join(", ").replace(/_/g, " ")}` : ""}` });
+    if (layers.events) for (const e of events.data ?? []) m.push({ id: `e${e.id}`, lat: e.lat, lng: e.lng, kind: "event", label: e.title, detail: new Date(e.starts_at).toLocaleString() });
+    if (layers.services) for (const s of (services.data ?? []).filter((x) => x.lat != null)) m.push({ id: `s${s.id}`, lat: s.lat!, lng: s.lng!, kind: "service", icon: s.category === "hospital" ? "H" : s.category === "pharmacy" ? "Rx" : "+", label: s.name, detail: s.phone ?? undefined });
     return m;
-  }, [c, layers, reqs.data, helpers.data, events.data, services.data]);
+  }, [c, layers, reqs.data, helpers.data, events.data, services.data, circleIds]);
 
   if (!user) return null;
   const err = reqs.error || helpers.error;
@@ -93,7 +94,7 @@ export default function RadarPage() {
                   </div>
                 </Card>
                 {reqs.loading ? <LoadingBlock /> : (reqs.data ?? []).length === 0 ? (
-                  <Card><p className="text-center text-sm text-muted">No open requests nearby{category || urgency ? " for these filters" : ""}. 🌿</p></Card>
+                  <Card><p className="text-center text-sm text-muted">No open requests nearby{category || urgency ? " for these filters" : ""}.</p></Card>
                 ) : (
                   <ul className="space-y-2">
                     {reqs.data!.slice(0, 12).map((r) => (
@@ -109,6 +110,21 @@ export default function RadarPage() {
                       </li>
                     ))}
                   </ul>
+                )}
+                {layers.helpers && (helpers.data ?? []).length > 0 && (
+                  <Card className="!p-3">
+                    <h2 className="mb-2 text-sm font-bold">Helpers nearby (list version of the map markers)</h2>
+                    <ul className="space-y-2 text-sm">
+                      {helpers.data!.slice(0, 10).map((h) => (
+                        <li key={h.id} className="flex flex-wrap items-center gap-2">
+                          {circleIds.has(h.id) ? <Badge tone="brand" icon="♥">Trusted Circle</Badge> : <Badge tone="ok" icon="✓">{h.verified ? "Verified helper" : "Helper"}</Badge>}
+                          <span>{fmtDistance(h.distance_km)}</span>
+                          {h.trust_score != null && <span className="text-muted">trust {Math.round(h.trust_score)}</span>}
+                          {h.skills.length > 0 && <span className="text-muted">{h.skills.slice(0, 3).join(", ").replace(/_/g, " ")}</span>}
+                        </li>
+                      ))}
+                    </ul>
+                  </Card>
                 )}
               </div>
             </div>

@@ -63,16 +63,15 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         {items.map((t) => (
           <div
             key={t.id}
-            className={`rise pointer-events-auto rounded-xl border px-4 py-3 shadow-card ${
-              t.kind === "error" || t.kind === "emergency"
-                ? "border-danger/40 bg-dangersoft text-ink"
-                : t.kind === "success"
-                  ? "border-ok/40 bg-oksoft text-ink"
-                  : "border-line bg-surface text-ink"
+            className={`rise clay-card pointer-events-auto flex gap-3 border-2 px-4 py-3 ${
+              t.kind === "error" || t.kind === "emergency" ? "!border-danger" : t.kind === "success" ? "!border-ok" : "!border-brand"
             }`}
           >
-            <p className="text-sm font-semibold">{t.title}</p>
-            {t.body && <p className="mt-0.5 text-sm text-muted">{t.body}</p>}
+            <span aria-hidden className="font-extrabold">{t.kind === "error" ? "⚠" : t.kind === "emergency" ? "⬢" : t.kind === "success" ? "✓" : "ℹ"}</span>
+            <div>
+              <p className="text-sm font-bold">{t.kind === "error" ? "Problem: " : t.kind === "emergency" ? "Emergency: " : t.kind === "success" ? "Done: " : ""}{t.title}</p>
+              {t.body && <p className="mt-0.5 text-sm">{t.body}</p>}
+            </div>
           </div>
         ))}
       </div>

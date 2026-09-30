@@ -1,4 +1,5 @@
 "use client";
+import { Users } from "lucide-react";
 import { useState } from "react";
 import { Avatar, Badge, Button, Card, EmptyState, ErrorState, Field, Input, LoadingBlock, Modal, Notice, SectionTitle, Select, Toggle } from "@/components/ui";
 import { api, errorMessage } from "@/lib/api";
@@ -115,7 +116,7 @@ export default function CirclePage() {
           )}
 
           {circle.data.total === 0 ? (
-            <EmptyState icon="🫂" title="Your circle is empty" body="Add family, relatives and friends who are on NEXA. Both of you must agree before the relationship is verified." action={<Button onClick={() => setAddOpen(true)}>Add your first person</Button>} />
+            <EmptyState icon={<Users size={26} />} title="Your circle is empty" body="Add family, relatives and friends who are on NEXA. Both of you must agree before the relationship is verified." action={<Button onClick={() => setAddOpen(true)}>Add your first person</Button>} />
           ) : (
             <>
               <Notice tone="brand">
@@ -134,7 +135,6 @@ export default function CirclePage() {
                             <Avatar name={e.user.name} size={44} />
                             <div className="min-w-0 flex-1">
                               <p className="truncate font-semibold">
-                                {e.available ? "🟢 " : "⚪ "}
                                 {e.user.name}
                               </p>
                               <p className="text-sm text-muted">

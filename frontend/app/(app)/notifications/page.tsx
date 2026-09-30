@@ -1,4 +1,5 @@
 "use client";
+import { Bell } from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";
 import { Card, EmptyState, ErrorState, LoadingBlock } from "@/components/ui";
@@ -30,13 +31,13 @@ export default function NotificationsPage() {
     <div className="space-y-4">
       <h1 className="text-2xl font-bold tracking-tight">Notifications</h1>
       {loading ? <LoadingBlock /> : error ? <ErrorState message={error} onRetry={reload} /> : (data?.items.length ?? 0) === 0 ? (
-        <EmptyState icon="🔔" title="You're all caught up" body="Updates about your requests and Trusted Circle appear here." />
+        <EmptyState icon={<Bell size={26} />} title="You're all caught up" body="Updates about your requests and Trusted Circle appear here." />
       ) : (
         <ul className="space-y-2">
           {data!.items.map((n) => {
             const link = href(n);
             const inner = (
-              <Card className={`!p-4 ${!n.read ? "border-brand/50 bg-brandsoft/40" : ""}`}>
+              <Card tone={n.read ? "neutral" : "sky"} className="!p-4">
                 <div className="flex justify-between gap-3">
                   <p className="font-semibold">{n.title}</p>
                   <span className="shrink-0 text-xs text-muted">{timeAgo(n.created_at)}</span>

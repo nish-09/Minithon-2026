@@ -34,8 +34,8 @@ export default function LoginPage() {
       <p className="mt-1 text-muted">Log in to reach your neighborhood.</p>
       <form onSubmit={submit} className="mt-6 space-y-4" noValidate>
         {error && <Notice tone="danger">{error}</Notice>}
-        <Field label="Email">{(id) => <Input id={id} type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />}</Field>
-        <Field label="Password">{(id) => <Input id={id} type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />}</Field>
+        <Field label="Email" required>{(id, a) => <Input id={id} {...a} type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />}</Field>
+        <Field label="Password" required>{(id, a) => <Input id={id} {...a} type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />}</Field>
         <Button type="submit" size="lg" className="w-full" loading={busy} disabled={!email || !password}>
           Log in
         </Button>

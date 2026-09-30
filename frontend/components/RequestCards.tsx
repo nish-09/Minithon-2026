@@ -2,10 +2,10 @@
 import Link from "next/link";
 import { useState } from "react";
 import { api, errorMessage } from "@/lib/api";
-import { CLOSED_STATUSES, STATUS_LABEL, fmtDistance, timeAgo } from "@/lib/format";
+import { CLOSED_STATUSES, fmtDistance, timeAgo } from "@/lib/format";
 import { useToast } from "@/lib/hooks";
 import type { HelpRequest } from "@/lib/types";
-import { Badge, Button, Card, UrgencyBadge, cx } from "./ui";
+import { Badge, Button, Card, StatusBadge, UrgencyBadge, cx } from "./ui";
 
 export function RequestRow({ r }: { r: HelpRequest }) {
   const closed = CLOSED_STATUSES.includes(r.status);
@@ -17,13 +17,13 @@ export function RequestRow({ r }: { r: HelpRequest }) {
         </span>
         <div className="min-w-0 flex-1">
           <p className="truncate font-semibold">{r.title}</p>
-          <p className="truncate text-sm text-muted">
-            {STATUS_LABEL[r.status] ?? r.status} · {timeAgo(r.created_at)}
+          <p className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted">
+            <StatusBadge status={r.status} /> {timeAgo(r.created_at)}
           </p>
         </div>
         <div className="flex flex-col items-end gap-1">
           <UrgencyBadge urgency={r.urgency} />
-          {r.assignments?.[0]?.eta_minutes != null && !closed && <Badge tone="ok">ETA {Math.round(r.assignments[0].eta_minutes)} min</Badge>}
+          {r.assignments?.[0]?.eta_minutes != null && !closed && <Badge tone="ok" icon="⏱">ETA {Math.round(r.assignments[0].eta_minutes)} min</Badge>}
         </div>
       </Card>
     </Link>

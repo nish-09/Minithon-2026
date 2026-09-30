@@ -101,7 +101,7 @@ function ProfileInner({ user }: { user: Me }) {
                     <input type="checkbox" className="h-5 w-5 accent-[var(--brand)]" checked={s.slug in skills} onChange={(e) => setSkills((x) => { const n = { ...x }; if (e.target.checked) n[s.slug] = 1; else delete n[s.slug]; return n; })} />
                     {s.label}
                   </label>
-                  {s.slug in skills && <label className="flex items-center gap-1.5 text-xs text-muted">yrs <input type="number" min={0} max={70} value={skills[s.slug]} onChange={(e) => setSkills((x) => ({ ...x, [s.slug]: Math.max(0, Math.min(70, Number(e.target.value) || 0)) }))} className="h-9 w-16 rounded-lg border border-line bg-surface px-2 text-ink" aria-label={`Years of experience in ${s.label}`} /></label>}
+                  {s.slug in skills && <label className="flex items-center gap-1.5 text-xs text-muted">yrs <input type="number" min={0} max={70} value={skills[s.slug]} onChange={(e) => setSkills((x) => ({ ...x, [s.slug]: Math.max(0, Math.min(70, Number(e.target.value) || 0)) }))} className="h-9 w-16 rounded-lg border-2 border-linestrong bg-surface px-2 text-ink" aria-label={`Years of experience in ${s.label}`} /></label>}
                 </div>
               ))}
             </div>
@@ -133,9 +133,9 @@ function ProfileInner({ user }: { user: Me }) {
                   return (
                     <div key={d} className="flex items-center gap-2">
                       <span className="w-24">{DAY_LABEL[d]}</span>
-                      <input type="time" aria-label={`${DAY_LABEL[d]} from`} value={start ?? ""} onChange={(e) => set(e.target.value, end ?? "")} className="h-10 rounded-lg border border-line bg-surface px-2" />
+                      <input type="time" aria-label={`${DAY_LABEL[d]} from`} value={start ?? ""} onChange={(e) => set(e.target.value, end ?? "")} className="h-10 rounded-lg border-2 border-linestrong bg-surface px-2" />
                       <span>to</span>
-                      <input type="time" aria-label={`${DAY_LABEL[d]} until`} value={end ?? ""} onChange={(e) => set(start ?? "", e.target.value)} className="h-10 rounded-lg border border-line bg-surface px-2" />
+                      <input type="time" aria-label={`${DAY_LABEL[d]} until`} value={end ?? ""} onChange={(e) => set(start ?? "", e.target.value)} className="h-10 rounded-lg border-2 border-linestrong bg-surface px-2" />
                     </div>
                   );
                 })}

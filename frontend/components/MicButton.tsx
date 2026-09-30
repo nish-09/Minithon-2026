@@ -1,4 +1,5 @@
 "use client";
+import { Mic } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { listen, speechErrorMessage, useSpeechSupport, type Listener } from "@/lib/speech";
 import { cx } from "./ui";
@@ -37,7 +38,7 @@ export function MicButton({ onTranscript, onInterim, className }: { onTranscript
         title={!supported ? "Voice input isn't supported in this browser. Type instead." : undefined}
         className={cx("grid h-12 w-12 place-items-center rounded-xl text-xl transition disabled:opacity-40", on ? "bg-dangersolid text-white pulse-ring" : "bg-brandsoft text-brandtext", className)}
       >
-        🎙
+        <Mic aria-hidden size={22} />
       </button>
       {err && (
         <p role="alert" className="mt-1 max-w-48 text-xs text-danger">

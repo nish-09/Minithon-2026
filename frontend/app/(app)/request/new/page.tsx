@@ -1,4 +1,5 @@
 "use client";
+import { Phone, Siren } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { MicButton } from "@/components/MicButton";
@@ -147,17 +148,17 @@ function NewRequest() {
   /* ------------------ step 2 ------------------ */
   const circle = res.trusted_circle;
   return (
-    <div className={cx("mx-auto max-w-2xl space-y-5", critical && "emergency -mx-4 rounded-3xl bg-bg p-4 text-ink sm:mx-auto")}>
+    <div className="mx-auto max-w-2xl space-y-5">
       <div className="flex items-center gap-3">
         <button onClick={() => setStep("describe")} className="grid h-10 w-10 place-items-center rounded-full hover:bg-surface2" aria-label="Back">←</button>
         <h1 className="text-2xl font-bold tracking-tight">{critical ? "This sounds serious" : "Here's what I understood"}</h1>
       </div>
 
       {critical && (
-        <div role="alert" className="rounded-2xl border-2 border-danger bg-dangersoft p-4">
+        <div role="alert" className="emergency-panel p-4">
           <p className="text-lg font-bold">If this is an emergency, call {res.emergency_advice?.match(/\d+/)?.[0] ?? "112"} now.</p>
           <p className="mt-1 text-sm">{res.emergency_advice} NEXA will alert your Trusted Circle and first-aid-trained neighbours at the same time, and guide you step by step.</p>
-          <a href={`tel:${res.emergency_advice?.match(/\d+/)?.[0] ?? "112"}`} className="mt-3 inline-flex min-h-12 items-center rounded-xl bg-dangersolid px-5 font-bold text-white">📞 Call emergency number</a>
+          <a href={`tel:${res.emergency_advice?.match(/\d+/)?.[0] ?? "112"}`} className="emergency-btn mt-3 inline-flex min-h-14 items-center px-5"><Phone aria-hidden size={22} className="mr-2" /> CALL EMERGENCY SERVICES</a>
         </div>
       )}
 
@@ -212,7 +213,7 @@ function NewRequest() {
                 <ul className="space-y-1.5">
                   {circle.members.map((m) => (
                     <li key={m.id} className="flex items-center gap-2 text-sm">
-                      <span className={m.available ? "text-ok" : "text-muted"} aria-label={m.available ? "available" : "not marked available"}>{m.available ? "🟢" : "⚪"}</span>
+                      <span className={m.available ? "text-ok" : "text-muted"} >{m.available ? "● Available" : "○ Not available"}</span>
                       <span className="flex-1">{m.name}</span>
                       <span className="text-muted">{fmtDistance(m.distance_km)}</span>
                     </li>
@@ -248,8 +249,8 @@ function NewRequest() {
       </Card>
 
       {error && <Notice tone="danger">{error}</Notice>}
-      <Button size="lg" variant={critical ? "danger" : "primary"} className="w-full" onClick={() => void submit()} loading={submitting} disabled={routing === "custom" && !critical && custom.size === 0}>
-        {critical ? "🚨 Start NEXA CARE and alert help" : routing === "circle_first" ? "Ask Trusted Circle" : routing === "custom" ? `Send to ${custom.size} selected` : "Find community help"}
+      <Button size="lg" variant={critical ? "emergency" : "primary"} className="w-full" onClick={() => void submit()} loading={submitting} disabled={routing === "custom" && !critical && custom.size === 0}>
+        {critical ? <><Siren aria-hidden size={22} /> Start NEXA CARE and alert help</> : routing === "circle_first" ? "Ask Trusted Circle" : routing === "custom" ? `Send to ${custom.size} selected` : "Find community help"}
       </Button>
     </div>
   );

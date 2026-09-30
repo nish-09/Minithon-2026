@@ -1,4 +1,5 @@
 "use client";
+import { Mic } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { api, errorMessage } from "@/lib/api";
@@ -161,7 +162,7 @@ export function VoicePanel({ open, onClose, initialText }: { open: boolean; onCl
             title={supported ? "" : "Voice input isn't supported in this browser. Type instead."}
             className={cx("grid h-12 w-12 shrink-0 place-items-center rounded-full text-xl transition disabled:opacity-40", listening ? "bg-dangersolid text-white pulse-ring" : "bg-brand text-brandink")}
           >
-            🎙
+            <Mic aria-hidden size={22} />
           </button>
           <Input value={text} onChange={(e) => setText(e.target.value)} placeholder={listening ? "Listening…" : "Type a message…"} aria-label="Message to NEXA" maxLength={1000} />
           <Button type="submit" loading={busy} disabled={!text.trim()}>

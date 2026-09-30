@@ -1,4 +1,5 @@
 "use client";
+import { BookOpen, Phone } from "lucide-react";
 import { useState } from "react";
 import { Badge, Card, EmptyState, ErrorState, Input, LoadingBlock, Segmented } from "@/components/ui";
 import { api } from "@/lib/api";
@@ -32,14 +33,14 @@ export default function DirectoryPage() {
       <div className="flex flex-wrap gap-3">
         <Input aria-label="Search the directory" placeholder="Search by name…" value={q} onChange={(e) => setQ(e.target.value)} maxLength={80} className="max-w-xs" />
         <div className="max-w-full overflow-x-auto">
-          <select aria-label="Category" value={cat} onChange={(e) => setCat(e.target.value)} className="min-h-11 rounded-xl border border-line bg-surface px-3 sm:hidden">
+          <select aria-label="Category" value={cat} onChange={(e) => setCat(e.target.value)} className="min-h-11 rounded-xl border-2 border-linestrong bg-surface px-3 sm:hidden">
             {CATS.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
           </select>
           <div className="hidden sm:block"><Segmented label="Category" value={cat} onChange={setCat} options={CATS} /></div>
         </div>
       </div>
       {loading ? <LoadingBlock /> : error ? <ErrorState message={error} onRetry={reload} /> : (data ?? []).length === 0 ? (
-        <EmptyState icon="📒" title="Nothing found" body="Try a different category or search." />
+        <EmptyState icon={<BookOpen size={26} />} title="Nothing found" body="Try a different category or search." />
       ) : (
         <ul className="grid gap-3 sm:grid-cols-2">
           {data!.map((e) => (
@@ -50,7 +51,7 @@ export default function DirectoryPage() {
                   <Badge tone={e.category === "emergency" ? "danger" : "neutral"}>{e.category}</Badge>
                 </div>
                 <p className="mt-1 text-sm text-muted">{[e.is_24h ? "Open 24h" : null, e.distance_km != null ? fmtDistance(e.distance_km) : null].filter(Boolean).join(" · ")}</p>
-                {e.phone && <a href={`tel:${e.phone.replace(/\s/g, "")}`} className="mt-2 inline-flex min-h-11 items-center gap-2 font-semibold text-brandtext">📞 {e.phone}</a>}
+                {e.phone && <a href={`tel:${e.phone.replace(/\s/g, "")}`} className="mt-2 inline-flex min-h-11 items-center gap-2 font-semibold text-brandtext"><Phone aria-hidden size={18} /> {e.phone}</a>}
                 {e.notes && <p className="mt-1 text-xs text-muted">{e.notes}</p>}
               </Card>
             </li>

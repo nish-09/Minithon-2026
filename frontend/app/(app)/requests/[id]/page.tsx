@@ -1,4 +1,5 @@
 "use client";
+import { Footprints, MapPin, Siren } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -8,9 +9,9 @@ import Map, { type MapMarker } from "@/components/Map";
 import { InviteCard } from "@/components/RequestCards";
 import { StatusTimeline } from "@/components/StatusTimeline";
 import { TrustCardModal, TrustChip } from "@/components/TrustCard";
-import { Avatar, Badge, Button, Card, ErrorState, Field, Input, LoadingBlock, Modal, Notice, ProgressBar, SectionTitle, Textarea, UrgencyBadge, cx } from "@/components/ui";
+import { Avatar, Badge, Button, StatusBadge, Card, ErrorState, Field, Input, LoadingBlock, Modal, Notice, ProgressBar, SectionTitle, Textarea, UrgencyBadge, cx } from "@/components/ui";
 import { api, errorMessage } from "@/lib/api";
-import { CLOSED_STATUSES, STATUS_LABEL, fmtCountdown, fmtDistance, fmtEta } from "@/lib/format";
+import { CLOSED_STATUSES, fmtCountdown, fmtDistance, fmtEta } from "@/lib/format";
 import { useQuery, useToast } from "@/lib/hooks";
 import { useLiveEvents, useRealtime } from "@/lib/realtime";
 import type { HelpRequest, MatchResult } from "@/lib/types";
@@ -66,8 +67,8 @@ export default function RequestPage() {
 
   const markers = useMemo<MapMarker[]>(() => {
     if (!req || req.lat == null || req.lng == null) return [];
-    const m: MapMarker[] = [{ id: "req", lat: req.lat, lng: req.lng, emoji: req.viewer_role === "requester" ? "📍" : req.icon, color: req.urgency === "critical" ? "#dc2626" : "#4f46e5", label: req.viewer_role === "requester" ? "You" : req.location_approximate ? "Approximate location" : "Requester", pulse: req.urgency === "critical" }];
-    for (const a of req.assignments ?? []) if (a.lat != null && a.lng != null) m.push({ id: `a${a.id}`, lat: a.lat, lng: a.lng, emoji: "🧑‍🤝‍🧑", color: "#16a34a", label: a.helper.name, detail: a.eta_minutes ? `ETA ${fmtEta(a.eta_minutes)}` : undefined });
+    const m: MapMarker[] = [{ id: "req", lat: req.lat, lng: req.lng, kind: req.viewer_role === "requester" ? "me" : req.urgency === "critical" ? "critical" : req.urgency === "urgent" ? "urgent" : "request", icon: req.icon, label: req.viewer_role === "requester" ? "Your location" : req.location_approximate ? "Approximate location" : "Requester" }];
+    for (const a of req.assignments ?? []) if (a.lat != null && a.lng != null) m.push({ id: `a${a.id}`, lat: a.lat, lng: a.lng, kind: "helper", label: a.helper.name, detail: a.eta_minutes ? `ETA ${fmtEta(a.eta_minutes)}` : undefined });
     return m;
   }, [req]);
 
@@ -91,7 +92,7 @@ export default function RequestPage() {
           </div>
           <div className="mt-1.5 flex flex-wrap items-center gap-2">
             <UrgencyBadge urgency={req.urgency} />
-            <Badge tone={closed ? "neutral" : "brand"}>{STATUS_LABEL[req.status] ?? req.status}</Badge>
+            <StatusBadge status={req.status} />
             <span className="text-sm text-muted">{req.category_label}{req.time_requirement ? ` · ${req.time_requirement}` : ""}</span>
           </div>
         </div>
@@ -99,7 +100,7 @@ export default function RequestPage() {
 
       {critical && req.incident_id && isRequester && !closed && (
         <Link href={`/care/${req.incident_id}`} className="block rounded-2xl bg-dangersolid p-4 text-center font-bold text-white">
-          🚨 Open NEXA CARE (voice guidance)
+          <Siren aria-hidden size={20} className="mr-2 inline" /> Open NEXA CARE (voice guidance)
         </Link>
       )}
 
@@ -184,8 +185,8 @@ export default function RequestPage() {
         <Card>
           <SectionTitle>You&apos;re helping {req.requester?.name}</SectionTitle>
           <div className="flex flex-wrap gap-2">
-            {req.status === "ACCEPTED" && <Button loading={busy === "otw"} onClick={() => void act("otw", () => api(`/api/requests/${rid}/progress`, { method: "POST", body: { status: "ON_THE_WAY" } }), "Requester notified")}>🚶 I&apos;m on my way</Button>}
-            {["ACCEPTED", "ON_THE_WAY"].includes(req.status) && <Button variant="success" loading={busy === "arr"} onClick={() => void act("arr", () => api(`/api/requests/${rid}/progress`, { method: "POST", body: { status: "IN_PROGRESS" } }), "Marked as arrived")}>📍 I&apos;ve arrived</Button>}
+            {req.status === "ACCEPTED" && <Button loading={busy === "otw"} onClick={() => void act("otw", () => api(`/api/requests/${rid}/progress`, { method: "POST", body: { status: "ON_THE_WAY" } }), "Requester notified")}><Footprints aria-hidden size={18} /> I&apos;m on my way</Button>}
+            {["ACCEPTED", "ON_THE_WAY"].includes(req.status) && <Button variant="success" loading={busy === "arr"} onClick={() => void act("arr", () => api(`/api/requests/${rid}/progress`, { method: "POST", body: { status: "IN_PROGRESS" } }), "Marked as arrived")}><MapPin aria-hidden size={18} /> I&apos;ve arrived</Button>}
             <Button variant="secondary" loading={busy === "wd"} onClick={() => void act("wd", () => api(`/api/requests/${rid}/withdraw`, { method: "POST" }), "You've withdrawn")}>I can&apos;t make it</Button>
           </div>
           {req.my_assignment.eta_minutes != null && <p className="mt-2 text-sm text-muted">Your ETA: {fmtEta(req.my_assignment.eta_minutes)} ({fmtDistance(req.my_assignment.distance_km)})</p>}

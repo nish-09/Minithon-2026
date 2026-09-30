@@ -17,7 +17,7 @@ ASK → UNDERSTAND → ASSESS → MATCH → CONNECT → CARE → RESOLVE → LEA
 | Path | What it is |
 |---|---|
 | `backend/` | FastAPI + SQLAlchemy API, WebSocket hub, Trust Engine, SmartMatch, NEXA CARE, 261 pytest tests |
-| `frontend/` | Next.js 16 (App Router) + React 19 + TypeScript + Tailwind v4, Leaflet maps, 31 vitest tests |
+| `frontend/` | Next.js 16 (App Router) + React 19 + TypeScript + Tailwind v4, MapLibre custom map, 79 vitest tests |
 | `docker-compose.yml` | Production-shaped stack (Postgres + API + web). See "Verification status" |
 
 ## Quick start (local)
@@ -113,6 +113,51 @@ weights, emergency number, credits, optional LLM / STT). `frontend/.env.example`
 Production **must** set `NEXA_JWT_SECRET` (the app refuses to start with the default), `NEXA_DATABASE_URL`
 (PostgreSQL) and `NEXA_CORS_ORIGINS`. No secrets are committed; `.env*` is git-ignored.
 
+## Design system and accessibility
+
+**Bright Claymorphism, applied to the visual layer only** (no logic, API, auth, data or workflow changes).
+Tokens and component classes live in `frontend/app/globals.css`; React primitives in `frontend/components/ui.tsx`.
+
+- Palette: cool page `#DDEBFF` (about 60%), neutral clay cards (about 30%), pastel accents (about 10%):
+  lavender `#C9A7FF` (primary actions, selected nav), yellow `#FFE58A` (highlights, credits), mint `#9FF3D0` (success,
+  availability), peach `#FFB8A8` (errors, critical badges), sky `#9DD9FF` (info). Text is navy `#172033` with
+  `#526078` for secondary text. Cards take a pastel `tone` only occasionally.
+- Clay depth: cool-toned, low-opacity layered shadows plus inner highlights; radius 14-32px; raised buttons that lift
+  1px on hover and sink 1px on press; recessed inputs with a soft lavender focus glow; skeleton loaders that keep layout;
+  two very faint decorative blobs on the page. Icons are lucide outline icons (category emoji come from the API data
+  and are kept as product identity).
+- `#71809A` (the spec's "muted" tone) is below AA on most surfaces, so it is exposed as `--faint` for decoration only;
+  all meaningful secondary text uses `#526078`, and saturated pastel surfaces promote it to full navy.
+- **Priority levels** (`NORMAL`, `URGENT`, `CRITICAL`) each have a distinct glyph, word and colour. The backend has three
+  urgency levels, so there is no separate "HIGH" tier; URGENT is the high-priority state.
+- **Never colour alone:** every status/urgency/verification/availability/trust badge and every map marker combines
+  colour + icon + text (+ a distinct shape on the map). Form errors are text with an icon, not a red border.
+- **Emergency styling is scoped** to the NEXA CARE panels (`.emergency-panel`, `.emergency-btn`): flat, white, thick
+  dark-red borders, >= 7:1 text, no shadows, no decorative animation, 64-80px actions with explicit labels
+  ("CALL EMERGENCY SERVICES (112)"). The rest of the app stays calm. Screen order follows your priority list: status
+  strip, call action, current instruction, help/ETA, conversation, secondary details.
+- **Custom pastel map** (`lib/mapStyle.ts`, MapLibre on free OpenFreeMap vector data, no API key): lavender land, sage
+  parks, pastel-blue water, muted-purple roads, peach institutions, muted-yellow commercial areas, dark-plum labels, no
+  POI clutter. Markers: request = circle, urgent = diamond + "URGENT", critical = octagon + "CRITICAL", helper = square,
+  Trusted Circle = star, service = hexagon, you = pin. Map controls are clay buttons. The radar also lists helpers and
+  requests as text next to the map.
+- **Accessibility mechanics:** semantic landmarks + skip link, visible dual-ring focus (dark ring + white halo), 44px
+  targets, `aria-live` announcements for live changes (for example "Suresh accepted your request. Estimated arrival: 4
+  minutes."), `prefers-reduced-motion` disables all animation, layouts avoid fixed heights, every voice feature has a
+  typed/manual alternative.
+- **Automated checks:** `tests/contrast.test.ts` computes WCAG ratios for every token pair (AA text 4.5:1, UI 3:1,
+  emergency >= 7:1) so a palette change cannot silently break contrast; `tests/mapStyle.test.ts` validates the map style.
+  In the browser, axe-core (WCAG 2.0/2.1/2.2 A and AA) reports zero violations on Home, Request, Circle, Directory,
+  Profile, Notifications and NEXA CARE (start + session). One known remaining axe finding: on the Radar, two helper
+  markers that sit almost on top of each other fail the 2.5.8 target-spacing rule; the side list of helpers is the
+  equivalent control, and zooming separates them.
+
+Not done / not verified for the design work: screen-reader pass, colour-blind simulation tooling, 200% text-scale
+visual test, low-brightness testing and real-device touch testing. Dark mode was removed in favour of the single
+lavender design. "Proxy Buster" was not available to me, so the clay style follows the written brief rather than that
+project's source. MapLibre is pinned to 5.x (v6's web worker does not load under Turbopack); v5 has a published advisory
+in `Popup.setHTML`, which NEXA never uses (a test asserts the map code contains no `setHTML`/`innerHTML`/`Popup`).
+
 ## Testing
 
 ```bash
@@ -139,16 +184,15 @@ Verified in the authoring environment (Windows, Python 3.13, Node 22):
 - **Backend: 261 tests pass on SQLite and on a real PostgreSQL server** (embedded Postgres via
   `scripts/pg_test_server.py`), including the multi-threaded simultaneous-acceptance race. Running on Postgres
   caught one real bug (timestamps came back in the session timezone), now normalised to UTC.
-- **Frontend:** `tsc`, ESLint, production build, and 31 unit tests (API client failure modes, speech unsupported/denied
+- **Frontend:** `tsc`, ESLint, production build, and 79 unit tests (design-token contrast, map style validity, API client failure modes, speech unsupported/denied
   paths, geolocation permission states, Trust Card, UI primitives).
 - **The real app driven in Chrome** against the real API: login → request → Trusted Circle → live acceptance (WebSocket)
   → complete → rate; SOS → NEXA CARE → steps → "dizzy" protocol switch → helper assignment → "help has arrived";
   admin dashboard/analytics/heatmap; API outage screen and recovery. This found and fixed real defects (naive
   timestamps breaking the countdown, offline bounce to login, several responsive and contrast problems).
 - **Accessibility:** automated axe-core (WCAG 2.1 A/AA) reports zero violations on Home, Request, Tracking, Trusted
-  Circle, Radar, Directory, Profile, Notifications, NEXA CARE (start + session) and the admin tabs, in the dark theme
-  and the emergency theme. This is an automated check, not a full audit (no screen-reader pass, light theme checked
-  only by token contrast).
+  Circle, Radar, Directory, Profile, Notifications, NEXA CARE (start + session) and the admin tabs, on the
+  lavender clay design and the emergency panels. This is an automated check, not a full audit (no screen-reader pass).
 - **Responsive:** phone-width (390 px) layouts checked visually for Home, Request, Tracking, Circle, Radar; no
   horizontal overflow after fixes.
 

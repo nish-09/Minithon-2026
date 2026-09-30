@@ -38,7 +38,7 @@ export function StatusTimeline({ req }: { req: HelpRequest }) {
           const active = !closed && s === current;
           return (
             <li key={s} aria-current={active ? "step" : undefined} className="flex min-w-[68px] flex-1 flex-col items-center text-center">
-              <span className={cx("grid h-8 w-8 place-items-center rounded-full border-2 text-xs font-bold transition", done ? "border-ok bg-oksolid text-white" : active ? "border-brand bg-brand text-brandink pulse-ring" : "border-line text-muted")}>{done ? "✓" : i + 1}</span>
+              <span className={cx("grid h-8 w-8 place-items-center rounded-full border-2 text-xs font-bold transition", done ? "border-ok bg-mint text-ink" : active ? "border-brandtext bg-lavender text-ink pulse-ring" : "border-linestrong bg-surface2 text-muted")}>{done ? "✓" : i + 1}</span>
               <span className={cx("mt-1.5 text-[11px] leading-tight", active ? "font-semibold" : "text-muted")}>{RAIL_LABEL[s]}</span>
             </li>
           );

@@ -1,17 +1,22 @@
 "use client";
 import { useEffect, useId, useRef, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from "react";
+import { AlertTriangle, Info, OctagonAlert, Sprout, TriangleAlert, CheckCircle2 } from "lucide-react";
 import { initials } from "@/lib/format";
 
 export const cx = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).join(" ");
 
-/* ---------- buttons ---------- */
-type Variant = "primary" | "secondary" | "ghost" | "danger" | "success";
+/* ---------- buttons (raised clay, pressed = inset) ---------- */
+type Variant = "primary" | "secondary" | "ghost" | "danger" | "success" | "highlight" | "info" | "emergency" | "emergency-secondary";
 const VARIANT: Record<Variant, string> = {
-  primary: "bg-brand text-brandink hover:brightness-110 shadow-sm",
-  secondary: "bg-surface2 text-ink hover:brightness-95 border border-line",
-  ghost: "text-ink hover:bg-surface2",
-  danger: "bg-dangersolid text-white hover:brightness-110",
-  success: "bg-oksolid text-white hover:brightness-110",
+  primary: "clay-btn bg-lavender",
+  highlight: "clay-btn bg-yellow",
+  info: "clay-btn bg-sky",
+  secondary: "clay-btn clay-btn-secondary",
+  ghost: "rounded-2xl font-semibold text-ink transition-colors duration-150 hover:bg-white/60",
+  danger: "clay-btn bg-dangersolid text-white",
+  success: "clay-btn bg-mint",
+  emergency: "emergency-btn",
+  "emergency-secondary": "emergency-btn-secondary",
 };
 
 export function Button({
@@ -22,15 +27,15 @@ export function Button({
   children,
   disabled,
   ...rest
-}: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; size?: "sm" | "md" | "lg"; loading?: boolean }) {
+}: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; size?: "sm" | "md" | "lg" | "xl"; loading?: boolean }) {
   return (
     <button
       {...rest}
       disabled={disabled || loading}
       aria-busy={loading || undefined}
       className={cx(
-        "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl font-semibold transition disabled:cursor-not-allowed disabled:opacity-50",
-        size === "sm" ? "min-h-9 px-3 text-sm" : size === "lg" ? "min-h-14 px-6 text-lg" : "px-4 text-[15px]",
+        "inline-flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-60",
+        size === "sm" ? "min-h-11 px-4 text-sm" : size === "lg" ? "min-h-14 px-6 text-lg" : size === "xl" ? "min-h-16 px-7 text-xl" : "min-h-12 px-5 text-[15px]",
         VARIANT[variant],
         className,
       )}
@@ -51,9 +56,11 @@ export function Spinner({ className }: { className?: string }) {
 }
 
 /* ---------- surfaces ---------- */
-export function Card({ children, className, as: Tag = "section", ...rest }: { children: ReactNode; className?: string; as?: "section" | "div" | "article" } & React.HTMLAttributes<HTMLElement>) {
+export type CardTone = "neutral" | "yellow" | "lavender" | "mint" | "peach" | "sky";
+/** Neutral clay by default; pastel tones are accents and should stay a minority of the cards on a page. */
+export function Card({ children, className, tone = "neutral", as: Tag = "section", ...rest }: { children: ReactNode; className?: string; tone?: CardTone; as?: "section" | "div" | "article" } & React.HTMLAttributes<HTMLElement>) {
   return (
-    <Tag {...rest} className={cx("rounded-2xl border border-line bg-surface p-4 shadow-card sm:p-5", className)}>
+    <Tag {...rest} className={cx("clay-card p-5 sm:p-6", tone !== "neutral" && `tone-${tone}`, className)}>
       {children}
     </Tag>
   );
@@ -62,34 +69,73 @@ export function Card({ children, className, as: Tag = "section", ...rest }: { ch
 export function SectionTitle({ children, action }: { children: ReactNode; action?: ReactNode }) {
   return (
     <div className="mb-3 flex items-center justify-between gap-3">
-      <h2 className="text-base font-semibold tracking-tight">{children}</h2>
+      <h2 className="text-lg font-bold tracking-tight">{children}</h2>
       {action}
     </div>
   );
 }
 
-type Tone = "neutral" | "brand" | "ok" | "warn" | "danger";
+/* ---------- badges: state is ALWAYS icon + text (+ colour), never colour alone ---------- */
+type Tone = "neutral" | "brand" | "ok" | "warn" | "danger" | "info";
 const TONE: Record<Tone, string> = {
-  neutral: "bg-surface2 text-muted",
-  brand: "bg-brandsoft text-brandtext",
-  ok: "bg-oksoft text-ok",
-  warn: "bg-warnsoft text-warn",
-  danger: "bg-dangersoft text-danger",
+  neutral: "bg-surface2 border-linestrong",
+  brand: "bg-lavender border-ink/30",
+  ok: "bg-mint border-ink/30",
+  warn: "bg-yellow border-ink/30",
+  danger: "bg-peach border-ink/30",
+  info: "bg-sky border-ink/30",
 };
-export function Badge({ tone = "neutral", children, className }: { tone?: Tone; children: ReactNode; className?: string }) {
-  return <span className={cx("inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold", TONE[tone], className)}>{children}</span>;
+export function Badge({ tone = "neutral", icon, children, className }: { tone?: Tone; icon?: string; children: ReactNode; className?: string }) {
+  return (
+    <span className={cx("clay-pill inline-flex items-center gap-1.5 border px-3 py-1 text-xs font-bold text-ink", TONE[tone], className)}>
+      {icon && <span aria-hidden>{icon}</span>}
+      {children}
+    </span>
+  );
 }
 
+/** Priority: NORMAL (calm), URGENT (warning), CRITICAL (emergency). Distinct glyph + word + colour. */
 export function UrgencyBadge({ urgency }: { urgency: string }) {
-  return urgency === "critical" ? <Badge tone="danger">● Critical</Badge> : urgency === "urgent" ? <Badge tone="warn">Urgent</Badge> : <Badge>Normal</Badge>;
+  if (urgency === "critical") return <Badge tone="danger" icon="⬢">CRITICAL</Badge>;
+  if (urgency === "urgent") return <Badge tone="warn" icon="▲">URGENT</Badge>;
+  return <Badge tone="neutral" icon="●">Normal</Badge>;
+}
+
+const STATUS: Record<string, { icon: string; tone: Tone; label: string }> = {
+  CREATED: { icon: "●", tone: "neutral", label: "Created" },
+  ANALYZING: { icon: "◌", tone: "info", label: "Understanding" },
+  MATCHING: { icon: "◌", tone: "info", label: "Finding help" },
+  TRUSTED_CIRCLE: { icon: "♥", tone: "brand", label: "Asking Trusted Circle" },
+  HELPERS_NOTIFIED: { icon: "◌", tone: "info", label: "Helpers notified" },
+  ESCALATED: { icon: "↗", tone: "warn", label: "Widening to community" },
+  ASSIGNED: { icon: "✓", tone: "ok", label: "Helper assigned" },
+  ACCEPTED: { icon: "✓", tone: "ok", label: "Helper accepted" },
+  ON_THE_WAY: { icon: "➜", tone: "ok", label: "Helper on the way" },
+  IN_PROGRESS: { icon: "✚", tone: "ok", label: "Help in progress" },
+  COMPLETED: { icon: "✓", tone: "ok", label: "COMPLETED" },
+  RATED: { icon: "★", tone: "ok", label: "Completed & rated" },
+  CANCELLED: { icon: "✕", tone: "neutral", label: "Cancelled" },
+  EXPIRED: { icon: "⌛", tone: "warn", label: "Expired" },
+};
+export function StatusBadge({ status }: { status: string }) {
+  const s = STATUS[status] ?? { icon: "●", tone: "neutral" as Tone, label: status };
+  return <Badge tone={s.tone} icon={s.icon}>{s.label}</Badge>;
+}
+
+export function AvailabilityBadge({ available }: { available: boolean | null | undefined }) {
+  return available ? <Badge tone="ok" icon="●">Available</Badge> : <Badge tone="neutral" icon="○">Not available</Badge>;
+}
+
+export function VerifiedBadge({ verified, label = "Identity" }: { verified: boolean; label?: string }) {
+  return verified ? <Badge tone="ok" icon="✓">{label} verified</Badge> : <Badge tone="warn" icon="!">{label} not verified</Badge>;
 }
 
 export function Avatar({ name, src, size = 40 }: { name: string; src?: string | null; size?: number }) {
   return src ? (
     // eslint-disable-next-line @next/next/no-img-element
-    <img src={src} alt="" width={size} height={size} className="rounded-full object-cover" style={{ width: size, height: size }} />
+    <img src={src} alt="" width={size} height={size} className="rounded-full border-2 border-white object-cover shadow" style={{ width: size, height: size }} />
   ) : (
-    <span aria-hidden className="grid shrink-0 place-items-center rounded-full bg-brandsoft font-semibold text-brandtext" style={{ width: size, height: size, fontSize: size * 0.38 }}>
+    <span aria-hidden className="grid shrink-0 place-items-center rounded-full border-2 border-white bg-lavender font-bold text-ink shadow" style={{ width: size, height: size, fontSize: size * 0.38 }}>
       {initials(name)}
     </span>
   );
@@ -98,18 +144,20 @@ export function Avatar({ name, src, size = 40 }: { name: string; src?: string | 
 /* ---------- states ---------- */
 export function LoadingBlock({ label = "Loading…" }: { label?: string }) {
   return (
-    <div className="flex items-center justify-center gap-3 py-10 text-muted" role="status">
-      <Spinner />
-      <span>{label}</span>
+    <div role="status" className="space-y-3 py-4" aria-busy="true">
+      <span className="sr-only">{label}</span>
+      <div className="skeleton h-6 w-2/5" />
+      <div className="skeleton h-20 w-full" />
+      <div className="skeleton h-20 w-full" />
     </div>
   );
 }
 
 export function ErrorState({ message, onRetry }: { message: string; onRetry?: () => void }) {
   return (
-    <div role="alert" className="rounded-2xl border border-danger/30 bg-dangersoft p-5 text-center">
-      <p className="font-semibold">Something didn&apos;t load</p>
-      <p className="mt-1 text-sm text-muted">{message}</p>
+    <div role="alert" className="clay-card border-2 !border-danger p-5 text-center">
+      <p className="flex items-center justify-center gap-2 font-bold text-danger"><TriangleAlert aria-hidden size={20} />Something didn&apos;t load</p>
+      <p className="mt-1 text-sm">{message}</p>
       {onRetry && (
         <Button variant="secondary" size="sm" className="mt-3" onClick={onRetry}>
           Try again
@@ -119,48 +167,68 @@ export function ErrorState({ message, onRetry }: { message: string; onRetry?: ()
   );
 }
 
-export function EmptyState({ icon = "🌿", title, body, action }: { icon?: string; title: string; body?: string; action?: ReactNode }) {
+export function EmptyState({ icon, title, body, action }: { icon?: ReactNode; title: string; body?: string; action?: ReactNode }) {
   return (
-    <div className="rounded-2xl border border-dashed border-line p-8 text-center">
-      <div className="text-3xl" aria-hidden>
-        {icon}
+    <div className="clay-well p-8 text-center">
+      <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-mint text-ink shadow" aria-hidden>
+        {icon ?? <Sprout size={26} />}
       </div>
-      <p className="mt-2 font-semibold">{title}</p>
+      <p className="mt-2 font-bold">{title}</p>
       {body && <p className="mx-auto mt-1 max-w-sm text-sm text-muted">{body}</p>}
       {action && <div className="mt-4">{action}</div>}
     </div>
   );
 }
 
+const NOTICE: Record<string, { cls: string; Icon: typeof Info; word: string }> = {
+  warn: { cls: "bg-yellow", Icon: TriangleAlert, word: "Note" },
+  danger: { cls: "bg-peach", Icon: OctagonAlert, word: "Problem" },
+  ok: { cls: "bg-mint", Icon: CheckCircle2, word: "Success" },
+  brand: { cls: "bg-sky", Icon: Info, word: "Info" },
+};
 export function Notice({ tone = "warn", children, className }: { tone?: "warn" | "danger" | "ok" | "brand"; children: ReactNode; className?: string }) {
-  const t = { warn: "bg-warnsoft", danger: "bg-dangersoft", ok: "bg-oksoft", brand: "bg-brandsoft" }[tone];
+  const n = NOTICE[tone];
   return (
-    <div role={tone === "danger" ? "alert" : "note"} className={cx("rounded-xl px-4 py-3 text-sm", t, className)}>
-      {children}
+    <div role={tone === "danger" ? "alert" : "note"} className={cx("clay-card flex gap-3 !rounded-2xl px-4 py-3 text-sm text-ink", n.cls, className)}>
+      <n.Icon aria-hidden size={20} className="mt-0.5 shrink-0" />
+      <span className="sr-only">{n.word}:</span>
+      <div className="min-w-0 flex-1">{children}</div>
     </div>
   );
 }
 
 /* ---------- form controls ---------- */
-export function Field({ label, hint, error, children }: { label: string; hint?: string; error?: string | null; children: (id: string) => ReactNode }) {
+export interface FieldA11y {
+  "aria-describedby"?: string;
+  "aria-invalid"?: boolean;
+  "aria-required"?: boolean;
+}
+
+/** Visible label, explicit "(required)", and an error that is text + icon (never just a red border). */
+export function Field({ label, hint, error, required, children }: { label: string; hint?: string; error?: string | null; required?: boolean; children: (id: string, a: FieldA11y) => ReactNode }) {
   const id = useId();
+  const msgId = `${id}-msg`;
+  const a: FieldA11y = { "aria-describedby": error || hint ? msgId : undefined, "aria-invalid": error ? true : undefined, "aria-required": required || undefined };
   return (
     <div>
-      <label htmlFor={id} className="mb-1.5 block text-sm font-medium">
+      <label htmlFor={id} className="mb-1.5 block text-sm font-bold">
         {label}
+        {required && <span className="font-semibold text-muted"> (required)</span>}
       </label>
-      {children(id)}
-      {hint && !error && <p className="mt-1 text-xs text-muted">{hint}</p>}
-      {error && (
-        <p role="alert" className="mt-1 text-xs font-medium text-danger">
+      {children(id, a)}
+      {error ? (
+        <p id={msgId} role="alert" className="mt-1.5 flex gap-1.5 text-sm font-bold text-danger">
+          <AlertTriangle aria-hidden size={16} className="mt-0.5 shrink-0" />
           {error}
         </p>
-      )}
+      ) : hint ? (
+        <p id={msgId} className="mt-1 text-xs text-muted">{hint}</p>
+      ) : null}
     </div>
   );
 }
 
-const INPUT = "w-full rounded-xl border border-line bg-surface px-3.5 py-2.5 text-[15px] placeholder:text-muted/70 focus:border-brand";
+const INPUT = "clay-input min-h-12 w-full px-4 py-2.5 text-[15px] text-ink placeholder:text-muted";
 export const Input = (p: InputHTMLAttributes<HTMLInputElement>) => <input {...p} className={cx(INPUT, p.className)} />;
 export const Textarea = (p: TextareaHTMLAttributes<HTMLTextAreaElement>) => <textarea {...p} className={cx(INPUT, "resize-y", p.className)} />;
 export const Select = (p: SelectHTMLAttributes<HTMLSelectElement>) => <select {...p} className={cx(INPUT, "pr-8", p.className)} />;
@@ -170,7 +238,7 @@ export function Toggle({ checked, onChange, label, description, disabled }: { ch
   return (
     <div className="flex items-start justify-between gap-4">
       <div>
-        <label htmlFor={id} className="text-sm font-medium">
+        <label htmlFor={id} className="text-sm font-bold">
           {label}
         </label>
         {description && <p className="text-xs text-muted">{description}</p>}
@@ -182,9 +250,12 @@ export function Toggle({ checked, onChange, label, description, disabled }: { ch
         aria-checked={checked}
         disabled={disabled}
         onClick={() => onChange(!checked)}
-        className={cx("relative mt-0.5 h-7 w-12 shrink-0 rounded-full transition disabled:opacity-50", checked ? "bg-brand" : "bg-line")}
+        className="flex min-h-11 shrink-0 items-center gap-2 disabled:opacity-60"
       >
-        <span className={cx("absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-all", checked ? "left-[22px]" : "left-0.5")} />
+        <span className="w-7 text-right text-xs font-extrabold" aria-hidden>{checked ? "On" : "Off"}</span>
+        <span className={cx("relative h-8 w-14 rounded-full border-2 transition-colors", checked ? "border-[#4a2fb0] bg-lavender" : "border-linestrong bg-surface2")} style={{ boxShadow: "var(--clay-recess)" }}>
+          <span className={cx("absolute top-0.5 h-6 w-6 rounded-full border-2 bg-white transition-all", checked ? "left-[26px] border-[#4a2fb0]" : "left-0.5 border-linestrong")} style={{ boxShadow: "var(--clay-out-sm)" }} />
+        </span>
       </button>
     </div>
   );
@@ -208,12 +279,12 @@ export function Modal({ open, onClose, title, children, wide }: { open: boolean;
   }, [open, onClose]);
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-[1500] grid items-end bg-black/50 p-0 sm:place-items-center sm:p-4" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div ref={ref} tabIndex={-1} role="dialog" aria-modal="true" aria-label={title} className={cx("rise max-h-[92vh] w-full overflow-y-auto rounded-t-3xl bg-surface p-5 shadow-2xl sm:rounded-3xl", wide ? "sm:max-w-2xl" : "sm:max-w-md")}>
+    <div className="fixed inset-0 z-[1500] grid items-end bg-[#172033]/55 p-0 sm:place-items-center sm:p-4" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+      <div ref={ref} tabIndex={-1} role="dialog" aria-modal="true" aria-label={title} className={cx("rise clay-card max-h-[92vh] w-full overflow-y-auto !rounded-b-none !rounded-t-[28px] p-6 sm:!rounded-[28px]", wide ? "sm:max-w-2xl" : "sm:max-w-md")}>
         <div className="mb-4 flex items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold">{title}</h2>
-          <button onClick={onClose} aria-label="Close" className="grid h-9 w-9 place-items-center rounded-full hover:bg-surface2">
-            ✕
+          <h2 className="text-xl font-bold">{title}</h2>
+          <button onClick={onClose} aria-label={`Close ${title}`} className="clay-btn clay-btn-secondary grid h-11 w-11 place-items-center !rounded-full">
+            <span aria-hidden>✕</span>
           </button>
         </div>
         {children}
@@ -223,9 +294,9 @@ export function Modal({ open, onClose, title, children, wide }: { open: boolean;
 }
 
 export function ProgressBar({ value, tone = "brand", label }: { value: number; tone?: "brand" | "ok" | "warn" | "danger"; label?: string }) {
-  const bg = { brand: "bg-brand", ok: "bg-oksolid", warn: "bg-warn", danger: "bg-dangersolid" }[tone];
+  const bg = { brand: "bg-lavender", ok: "bg-mint", warn: "bg-yellow", danger: "bg-peach" }[tone];
   return (
-    <div className="h-2 w-full overflow-hidden rounded-full bg-surface2" role="progressbar" aria-valuenow={Math.round(value)} aria-valuemin={0} aria-valuemax={100} aria-label={label}>
+    <div className="clay-well h-3 w-full overflow-hidden !rounded-full" role="progressbar" aria-valuenow={Math.round(value)} aria-valuemin={0} aria-valuemax={100} aria-label={label}>
       <div className={cx("h-full rounded-full transition-all", bg)} style={{ width: `${Math.max(0, Math.min(100, value))}%` }} />
     </div>
   );
@@ -233,9 +304,10 @@ export function ProgressBar({ value, tone = "brand", label }: { value: number; t
 
 export function Segmented<T extends string>({ value, onChange, options, label }: { value: T; onChange: (v: T) => void; options: { value: T; label: string }[]; label: string }) {
   return (
-    <div role="radiogroup" aria-label={label} className="inline-flex rounded-xl border border-line bg-surface2 p-1">
+    <div role="radiogroup" aria-label={label} className="clay-well inline-flex flex-wrap gap-1 p-1">
       {options.map((o) => (
-        <button key={o.value} role="radio" aria-checked={value === o.value} onClick={() => onChange(o.value)} className={cx("min-h-9 rounded-lg px-3 text-sm font-medium transition", value === o.value ? "bg-surface shadow-sm" : "text-muted")}>
+        <button key={o.value} role="radio" aria-checked={value === o.value} onClick={() => onChange(o.value)} className={cx("min-h-11 rounded-2xl px-3.5 text-sm font-bold transition", value === o.value ? "clay-btn bg-lavender" : "text-ink transition-colors duration-150 hover:bg-white/70")}>
+          <span aria-hidden>{value === o.value ? "✓ " : ""}</span>
           {o.label}
         </button>
       ))}

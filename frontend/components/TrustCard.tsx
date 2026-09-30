@@ -1,4 +1,5 @@
 "use client";
+import { ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { api } from "@/lib/api";
 import { useQuery } from "@/lib/hooks";
@@ -136,7 +137,7 @@ export function TrustChip({ score, onClick }: { score: number | null; onClick?: 
   const cls = tone === "ok" ? "bg-oksoft text-ok" : tone === "warn" ? "bg-warnsoft text-warn" : "bg-dangersoft text-danger";
   return (
     <button type="button" onClick={onClick} className={cx("inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold", cls)} aria-label={`Trust ${Math.round(score)} out of 100. Open Trust Card`}>
-      🛡 {Math.round(score)}
+      <ShieldCheck aria-hidden size={14} /> {Math.round(score)} <span className="font-semibold">{tone === "ok" ? "High" : tone === "warn" ? "Medium" : "Low"}</span>
     </button>
   );
 }

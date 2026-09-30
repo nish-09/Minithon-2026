@@ -43,10 +43,10 @@ export default function RegisterPage() {
       <p className="mt-1 text-muted">Ask for help. Offer help. Know who you can count on.</p>
       <form onSubmit={submit} className="mt-6 space-y-4" noValidate>
         {error && <Notice tone="danger">{error}</Notice>}
-        <Field label="Full name" error={fieldErrors.name}>{(id) => <Input id={id} autoComplete="name" value={f.name} onChange={set("name")} />}</Field>
-        <Field label="Email" error={fieldErrors.email}>{(id) => <Input id={id} type="email" autoComplete="email" value={f.email} onChange={set("email")} />}</Field>
-        <Field label="Phone (optional)" hint="Used for verification. Never shown to other members." error={fieldErrors.phone}>{(id) => <Input id={id} type="tel" autoComplete="tel" value={f.phone} onChange={set("phone")} />}</Field>
-        <Field label="Password" hint="At least 8 characters." error={fieldErrors.password}>{(id) => <Input id={id} type="password" autoComplete="new-password" value={f.password} onChange={set("password")} />}</Field>
+        <Field label="Full name" required error={fieldErrors.name}>{(id, a) => <Input id={id} {...a} autoComplete="name" value={f.name} onChange={set("name")} />}</Field>
+        <Field label="Email" required error={fieldErrors.email}>{(id, a) => <Input id={id} {...a} type="email" autoComplete="email" value={f.email} onChange={set("email")} />}</Field>
+        <Field label="Phone (optional)" hint="Used for verification. Never shown to other members." error={fieldErrors.phone}>{(id, a) => <Input id={id} {...a} type="tel" autoComplete="tel" value={f.phone} onChange={set("phone")} />}</Field>
+        <Field label="Password" required hint="At least 8 characters." error={fieldErrors.password}>{(id, a) => <Input id={id} {...a} type="password" autoComplete="new-password" value={f.password} onChange={set("password")} />}</Field>
         <Button type="submit" size="lg" className="w-full" loading={busy}>
           Create account
         </Button>

@@ -1,4 +1,5 @@
 "use client";
+import { HeartHandshake, MapPin, Mic, Siren, Users } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
@@ -73,7 +74,7 @@ function Home() {
 
       {noLocation && (
         <Card className="border-brand/40 bg-brandsoft">
-          <p className="font-semibold">Where are you? 📍</p>
+          <p className="font-semibold"><span className="inline-flex items-center gap-2"><MapPin aria-hidden size={20} />Where are you?</span></p>
           <p className="mt-1 text-sm text-muted">NEXA needs your location to find people near you. It is only shared the way you choose in Privacy settings.</p>
           <div className="mt-3 flex flex-wrap gap-2">
             <Button onClick={loc.request} loading={loc.status === "asking"}>
@@ -101,7 +102,7 @@ function Home() {
             What do you need help with?
           </label>
           <div className="flex gap-2">
-            <input id="ask" value={ask} onChange={(e) => setAsk(e.target.value)} maxLength={1000} placeholder="e.g. I need someone to help me move a cupboard" className="min-h-12 w-full rounded-xl border border-line bg-bg px-4 text-base focus:border-brand" />
+            <input id="ask" value={ask} onChange={(e) => setAsk(e.target.value)} maxLength={1000} placeholder="e.g. I need someone to help me move a cupboard" className="min-h-12 w-full rounded-xl border-2 border-linestrong bg-surface2 px-4 text-base text-ink placeholder:text-muted focus:border-brand" />
             <Button type="submit" size="lg" disabled={ask.trim().length < 3}>
               Ask
             </Button>
@@ -109,10 +110,10 @@ function Home() {
         </form>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <Button variant="secondary" onClick={() => voice.open()}>
-            🎙 Talk to NEXA
+            <Mic aria-hidden size={18} /> Talk to NEXA
           </Button>
           <Link href="/care" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-dangersoft px-4 font-semibold text-danger">
-            🚨 I need urgent help
+            <Siren aria-hidden size={18} /> I need urgent help
           </Link>
         </div>
       </Card>
@@ -148,7 +149,7 @@ function Home() {
             ) : (
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {(ref.data?.categories ?? []).filter((c) => c.slug !== "other").map((c) => (
-                  <Link key={c.slug} href={`/request/new?category=${c.slug}`} className="flex min-h-14 items-center gap-3 rounded-xl border border-line bg-surface px-3 py-2 text-sm font-medium transition hover:border-brand/50">
+                  <Link key={c.slug} href={`/request/new?category=${c.slug}`} className="clay-card clay-card-hover flex min-h-14 items-center gap-3 !rounded-2xl px-3 py-2 text-sm font-semibold">
                     <span className="text-xl" aria-hidden>
                       {c.icon}
                     </span>
@@ -166,7 +167,7 @@ function Home() {
             ) : mine.error ? (
               <ErrorState message={mine.error} onRetry={mine.reload} />
             ) : activeMine.length === 0 ? (
-              <EmptyState icon="🤝" title="No open requests" body="When you ask for help, you can follow it here in real time." action={<Link href="/request/new" className="font-semibold text-brandtext">Ask for help →</Link>} />
+              <EmptyState icon={<HeartHandshake size={26} />} title="No open requests" body="When you ask for help, you can follow it here in real time." action={<Link href="/request/new" className="font-semibold text-brandtext">Ask for help →</Link>} />
             ) : (
               <div className="space-y-3">
                 {activeMine.map((r) => (
@@ -178,7 +179,7 @@ function Home() {
         </div>
 
         <aside className="space-y-4">
-          <Card>
+          <Card tone="mint">
             <Toggle checked={user.is_available} onChange={toggleAvailable} disabled={savingAvail} label="I can help neighbours" description="Get notified when someone nearby needs your skills." />
           </Card>
           <Card>
@@ -207,11 +208,11 @@ function Home() {
                 {circle.data.pending.some((p) => p.can_respond) && <Notice tone="brand" className="mt-3">You have a Trusted Circle invitation waiting.</Notice>}
               </>
             ) : (
-              <EmptyState icon="🫂" title="Add people you trust" body="Family and friends can be asked first when you need help." action={<Link href="/circle" className="font-semibold text-brandtext">Build your circle →</Link>} />
+              <EmptyState icon={<Users size={26} />} title="Add people you trust" body="Family and friends can be asked first when you need help." action={<Link href="/circle" className="font-semibold text-brandtext">Build your circle →</Link>} />
             )}
           </Card>
-          <Card>
-            <p className="text-sm text-muted">Help Credits</p>
+          <Card tone="yellow">
+            <p className="text-sm font-semibold text-ink">Help Credits</p>
             <p className="text-3xl font-bold">{user.credits}</p>
             <p className="text-xs text-muted">Earn credits by helping. Spend them when you receive help.</p>
           </Card>

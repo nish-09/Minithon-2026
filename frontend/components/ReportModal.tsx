@@ -13,7 +13,7 @@ export function ReportModal({ userId, requestId, onClose }: { userId: number | n
     <Modal open={userId !== null} onClose={onClose} title="Report a problem">
       <div className="space-y-3">
         <Field label="What happened?">{(id) => (
-          <select id={id} value={reason} onChange={(e) => setReason(e.target.value)} className="w-full rounded-xl border border-line bg-surface px-3.5 py-2.5">
+          <select id={id} value={reason} onChange={(e) => setReason(e.target.value)} className="w-full rounded-xl border-2 border-linestrong bg-surface px-3.5 py-2.5">
             {["unsafe", "harassment", "no_show", "fraud", "spam", "other"].map((r) => <option key={r} value={r}>{r.replace("_", " ")}</option>)}
           </select>
         )}</Field>

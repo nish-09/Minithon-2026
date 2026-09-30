@@ -54,7 +54,7 @@ export function ChatPanel({ requestId, disabled }: { requestId: number; disabled
       ) : (
         <>
           <div className="max-h-64 space-y-2 overflow-y-auto" aria-live="polite" aria-label="Messages">
-            {data!.length === 0 && <p className="py-4 text-center text-sm text-muted">No messages yet. Say hello 👋</p>}
+            {data!.length === 0 && <p className="py-4 text-center text-sm text-muted">No messages yet. Say hello.</p>}
             {data!.map((m) => (
               <div key={m.id} className={cx("max-w-[85%] rounded-2xl px-3.5 py-2 text-sm", m.sender_id === user?.id ? "ml-auto bg-brand text-brandink" : "bg-surface2")}>
                 {m.sender_id !== user?.id && <p className="text-[11px] font-semibold opacity-70">{m.sender?.split(" ")[0]}</p>}

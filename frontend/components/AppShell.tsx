@@ -1,4 +1,5 @@
 "use client";
+import { Bell, BookOpen, Home, Map as MapIcon, Mic, PenLine, ShieldCheck, UserRound, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
@@ -13,12 +14,12 @@ import { VoicePanel } from "./VoicePanel";
 import { VoiceCtx } from "./voice-context";
 
 const NAV = [
-  { href: "/", label: "Home", icon: "🏠" },
-  { href: "/request/new", label: "Ask for help", icon: "✍️" },
-  { href: "/radar", label: "Radar", icon: "🗺️" },
-  { href: "/circle", label: "Trusted Circle", icon: "🫂" },
-  { href: "/directory", label: "Directory", icon: "📒" },
-  { href: "/profile", label: "Profile", icon: "👤" },
+  { href: "/", label: "Home", icon: Home },
+  { href: "/request/new", label: "Ask for help", icon: PenLine },
+  { href: "/radar", label: "Radar", icon: MapIcon },
+  { href: "/circle", label: "Trusted Circle", icon: Users },
+  { href: "/directory", label: "Directory", icon: BookOpen },
+  { href: "/profile", label: "Profile", icon: UserRound },
 ];
 
 const EMERGENCY_KINDS = new Set(["emergency_advice", "critical_incident", "incident_escalated"]);
@@ -44,12 +45,17 @@ export function AppShell({ children }: { children: ReactNode }) {
     if (!loading && !user && !connectionError) router.replace("/login");
   }, [loading, user, connectionError, router]);
 
+  const [announce, setAnnounce] = useState("");
   useLiveEvents((e) => {
     if (e.type === "notification") {
+      setAnnounce(`${e.title}. ${e.body ?? ""}`);
       void unreadQ.reload();
       toast.push({ kind: EMERGENCY_KINDS.has(e.kind) ? "emergency" : "info", title: e.title, body: e.body });
     }
-    if (e.type === "incident_update") void incidentQ.reload();
+    if (e.type === "incident_update") {
+      void incidentQ.reload();
+      setAnnounce("NEXA CARE incident updated.");
+    }
     if (e.type === "message") toast.push({ kind: "info", title: `${e.from}: ${e.body}` });
   });
 
@@ -71,34 +77,34 @@ export function AppShell({ children }: { children: ReactNode }) {
     );
   }
   const inCare = path.startsWith("/care");
-  const nav = user.role === "admin" ? [...NAV, { href: "/admin", label: "Admin", icon: "🛡️" }] : NAV;
+  const nav = user.role === "admin" ? [...NAV, { href: "/admin", label: "Admin", icon: ShieldCheck }] : NAV;
   const active = (href: string) => (href === "/" ? path === "/" : path.startsWith(href));
 
   return (
     <VoiceCtx.Provider value={{ open: openVoice }}>
-    <div className={cx("min-h-screen bg-bg text-ink lg:grid lg:grid-cols-[250px_1fr]", inCare && "emergency")}>
-      <a href="#main" className="sr-only-focusable fixed left-2 top-2 z-[3000] rounded-lg bg-brand px-3 py-2 text-brandink">
+    <div className="min-h-screen text-ink lg:grid lg:grid-cols-[270px_1fr]">
+      <a href="#main" className="sr-only-focusable clay-btn fixed left-2 top-2 z-[3000] bg-brand px-4 py-3 text-brandink">
         Skip to content
       </a>
       {/* desktop sidebar */}
-      <aside className="hidden border-r border-line bg-surface lg:flex lg:flex-col lg:p-5" aria-label="Primary">
+      <aside className="clay-card hidden !rounded-[28px] lg:m-3 lg:flex lg:flex-col lg:p-5" aria-label="Primary">
         <Link href="/" className="mb-1 text-2xl font-extrabold tracking-tight text-brandtext">
           NEXA
         </Link>
         <p className="mb-6 text-xs text-muted">Your neighborhood, when you need it most.</p>
         <nav className="flex-1 space-y-1">
           {nav.map((n) => (
-            <Link key={n.href} href={n.href} aria-current={active(n.href) ? "page" : undefined} className={cx("flex min-h-11 items-center gap-3 rounded-xl px-3 font-medium transition", active(n.href) ? "bg-brandsoft text-brandtext" : "hover:bg-surface2")}>
-              <span aria-hidden>{n.icon}</span>
+            <Link key={n.href} href={n.href} aria-current={active(n.href) ? "page" : undefined} className={cx("flex min-h-12 items-center gap-3 rounded-2xl px-3 font-bold transition", active(n.href) ? "clay-btn bg-lavender" : "border border-transparent text-ink transition-colors duration-150 hover:bg-white/60")}>
+              <n.icon aria-hidden size={20} />
               {n.label}
             </Link>
           ))}
         </nav>
-        <div className="mt-4 flex items-center gap-3 border-t border-line pt-4">
+        <div className="mt-4 flex items-center gap-3 border-t-2 border-line pt-4">
           <Avatar name={user.name} src={user.avatar_url} size={36} />
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold">{user.name}</p>
-            <button onClick={() => void logout().then(() => router.replace("/login"))} className="text-xs text-muted underline">
+            <button onClick={() => void logout().then(() => router.replace("/login"))} className="min-h-11 text-sm font-semibold text-brandtext underline">
               Log out
             </button>
           </div>
@@ -106,32 +112,32 @@ export function AppShell({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="flex min-w-0 flex-col pb-24 lg:pb-0">
-        <header className="sticky top-0 z-[1000] flex items-center gap-3 border-b border-line bg-bg/85 px-4 py-2.5 backdrop-blur">
+        <header className="clay-card sticky top-3 z-[1000] mx-3 mt-3 flex items-center gap-3 !rounded-[22px] !p-0 px-4 py-2.5">
           <Link href="/" className="text-xl font-extrabold tracking-tight text-brandtext lg:hidden">
             NEXA
           </Link>
-          <span className={cx("hidden items-center gap-1.5 text-xs sm:flex", connected ? "text-ok" : "text-muted")} title={connected ? "Live updates connected" : "Reconnecting to live updates…"}>
-            <span className={cx("h-2 w-2 rounded-full", connected ? "bg-oksolid" : "bg-warn")} /> {connected ? "Live" : "Reconnecting…"}
+          <span className={cx("hidden items-center gap-1.5 text-xs font-bold sm:flex", connected ? "text-ok" : "text-warn")} title={connected ? "Live updates connected" : "Reconnecting to live updates…"}>
+            <span aria-hidden>{connected ? "●" : "▲"}</span> {connected ? "Live updates on" : "Reconnecting…"}
           </span>
           <div className="ml-auto flex items-center gap-2">
-            <button onClick={() => openVoice()} className="flex h-11 min-w-11 items-center justify-center gap-1.5 whitespace-nowrap rounded-full bg-brandsoft px-3 text-brandtext" aria-label="Talk to NEXA">
-              🎙 <span className="ml-1.5 hidden text-sm font-semibold sm:inline">Talk to NEXA</span>
+            <button onClick={() => openVoice()} className="clay-btn clay-btn-secondary flex h-11 min-w-11 items-center justify-center gap-1.5 whitespace-nowrap !rounded-full px-3" aria-label="Talk to NEXA">
+              <Mic aria-hidden size={18} /> <span className="hidden text-sm font-bold sm:inline">Talk to NEXA</span>
             </button>
-            <Link href="/notifications" className="relative grid h-11 w-11 place-items-center rounded-full hover:bg-surface2" aria-label={`Notifications${unread ? `, ${unread} unread` : ""}`}>
-              🔔
+            <Link href="/notifications" className="clay-btn clay-btn-secondary relative grid h-11 w-11 place-items-center !rounded-full" aria-label={`Notifications${unread ? `, ${unread} unread` : ""}`}>
+              <Bell aria-hidden size={20} />
               {unread > 0 && <span className="absolute right-1 top-1 grid h-5 min-w-5 place-items-center rounded-full bg-dangersolid px-1 text-[11px] font-bold text-white">{unread > 99 ? "99+" : unread}</span>}
             </Link>
-            <Link href="/care" className="grid h-11 place-items-center rounded-full bg-dangersolid px-4 text-sm font-bold text-white shadow" aria-label="Emergency help: start NEXA CARE">
+            <Link href="/care" className="clay-btn grid h-11 min-w-11 place-items-center !rounded-full bg-dangersolid px-4 text-sm text-white" aria-label="Emergency help: start NEXA CARE">
               SOS
             </Link>
           </div>
         </header>
 
         {incident && !inCare && (
-          <Link href={`/care/${incident.id}`} className="flex items-center justify-between gap-3 bg-dangersolid px-4 py-3 text-white" role="alert">
-            <span className="font-semibold">● NEXA CARE is active ({incident.incident_id})</span>
+          <div role="alert" className="mx-3 mt-3"><Link href={`/care/${incident.id}`} className="emergency-strip flex min-h-12 items-center justify-between gap-3 px-4 py-3">
+            <span className="font-extrabold">⬢ CRITICAL: NEXA CARE is active ({incident.incident_id})</span>
             <span className="text-sm underline">Return to care →</span>
-          </Link>
+          </Link></div>
         )}
 
         <main id="main" className="mx-auto w-full max-w-5xl flex-1 px-4 py-5 sm:px-6">
@@ -140,16 +146,15 @@ export function AppShell({ children }: { children: ReactNode }) {
       </div>
 
       {/* mobile tab bar */}
-      <nav className="fixed inset-x-0 bottom-0 z-[1000] grid grid-cols-5 border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden" aria-label="Primary">
+      <nav className="fixed inset-x-0 bottom-0 z-[1000] grid grid-cols-5 bg-surface pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_18px_rgb(92_110_140/0.18)] lg:hidden" aria-label="Primary">
         {[NAV[0], NAV[1], NAV[2], NAV[3], NAV[5]].map((n) => (
-          <Link key={n.href} href={n.href} aria-current={active(n.href) ? "page" : undefined} className={cx("flex min-h-14 flex-col items-center justify-center gap-0.5 text-[11px] font-medium", active(n.href) ? "text-brandtext" : "text-muted")}>
-            <span className="text-lg" aria-hidden>
-              {n.icon}
-            </span>
+          <Link key={n.href} href={n.href} aria-current={active(n.href) ? "page" : undefined} className={cx("flex min-h-14 flex-col items-center justify-center gap-0.5 text-xs font-bold", active(n.href) ? "m-1 rounded-2xl bg-lavender text-ink" : "text-muted")}>
+            <n.icon aria-hidden size={22} />
             {n.label === "Trusted Circle" ? "Circle" : n.label === "Ask for help" ? "Ask" : n.label}
           </Link>
         ))}
       </nav>
+      <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">{announce}</div>
       <VoicePanel open={voiceOpen} onClose={() => setVoiceOpen(false)} initialText={voiceText} />
     </div>
     </VoiceCtx.Provider>

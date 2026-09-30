@@ -1,4 +1,5 @@
 "use client";
+import { Mic, Phone, Siren } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Button, LoadingBlock, Notice, Textarea, Toggle, cx } from "@/components/ui";
@@ -75,16 +76,16 @@ export default function CareStart() {
 
   if (checking) return <LoadingBlock />;
   return (
-    <div className="emergency -mx-4 -my-5 min-h-[calc(100vh-4rem)] bg-bg px-4 py-8 text-ink sm:-mx-6 sm:px-6">
+    <div className="px-0 py-2">
       <div className="mx-auto max-w-xl space-y-6 text-center">
         <div>
-          <p className="text-sm font-bold uppercase tracking-widest text-danger">NEXA CARE</p>
+          <p className="text-sm font-extrabold uppercase tracking-widest text-danger">⬢ NEXA CARE · Emergency support</p>
           <h1 className="mt-2 text-3xl font-extrabold">Help is on the way. You&apos;re not alone.</h1>
           <p className="mt-2 text-muted">Tell me what happened. I&apos;ll alert your Trusted Circle and nearby first-aid helpers, and guide you step by step.</p>
         </div>
 
-        <a href="tel:112" className="flex min-h-16 items-center justify-center gap-3 rounded-2xl bg-dangersolid text-xl font-extrabold text-white shadow-lg">
-          📞 Call 112 now
+        <a href="tel:112" className="emergency-btn flex min-h-20 items-center justify-center gap-3 px-4 text-xl">
+          <Phone aria-hidden size={24} /> CALL EMERGENCY SERVICES (112)
         </a>
         <p className="text-xs text-muted">NEXA connects you with neighbours. It does not replace emergency services. For serious injuries, call first.</p>
 
@@ -94,9 +95,9 @@ export default function CareStart() {
             disabled={!supported || busy}
             aria-pressed={listening}
             aria-label={listening ? "Stop listening" : "Tap to talk to NEXA"}
-            className={cx("mx-auto grid h-36 w-36 place-items-center rounded-full bg-dangersolid text-6xl text-white shadow-2xl transition disabled:opacity-40", listening && "pulse-ring")}
+            className={cx("clay-btn mx-auto grid h-36 w-36 place-items-center !rounded-full text-6xl disabled:opacity-50", listening ? "bg-dangersolid text-white" : "bg-brand text-brandink")}
           >
-            🎙
+            <Mic aria-hidden size={60} />
           </button>
           <p className="mt-4 min-h-6 text-lg font-medium" aria-live="polite">{listening ? interim || "Listening…" : prompt}</p>
           {!supported && <Notice tone="warn" className="mt-3 text-left">Voice input isn&apos;t supported in this browser. Type below instead.</Notice>}
@@ -116,8 +117,8 @@ export default function CareStart() {
             </Notice>
           )}
           {error && <Notice tone="danger">{error}</Notice>}
-          <Button size="lg" variant="danger" className="w-full" loading={busy} disabled={text.trim().length < 3} onClick={() => void begin(text.trim())}>
-            🚨 Start NEXA CARE
+          <Button size="xl" variant="emergency" className="w-full" loading={busy} disabled={text.trim().length < 3} onClick={() => void begin(text.trim())}>
+            <Siren aria-hidden size={22} /> Start NEXA CARE
           </Button>
         </div>
       </div>

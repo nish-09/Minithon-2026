@@ -1,8 +1,9 @@
 "use client";
+import { CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import Map from "@/components/Map";
-import { Badge, Button, Card, EmptyState, ErrorState, Field, Input, LoadingBlock, Modal, Notice, SectionTitle, Select, Textarea, UrgencyBadge, cx } from "@/components/ui";
+import { Badge, Button, Card, type CardTone, EmptyState, ErrorState, Field, Input, LoadingBlock, Modal, Notice, SectionTitle, Select, Textarea, UrgencyBadge, cx } from "@/components/ui";
 import { api, errorMessage } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { fmtDuration, STATUS_LABEL, timeAgo } from "@/lib/format";
@@ -40,10 +41,10 @@ export default function AdminPage() {
   );
 }
 
-function Stat({ label, value, tone }: { label: string; value: string | number; tone?: "danger" | "warn" }) {
+function Stat({ label, value, tone, card }: { label: string; value: string | number; tone?: "danger" | "warn"; card?: CardTone }) {
   return (
-    <Card className="!p-4">
-      <p className="text-sm text-muted">{label}</p>
+    <Card tone={card} className="!p-4">
+      <p className="text-sm font-semibold text-ink">{label}</p>
       <p className={cx("mt-1 text-3xl font-bold tabular-nums", tone === "danger" && Number(value) > 0 && "text-danger", tone === "warn" && Number(value) > 0 && "text-warn")}>{value}</p>
     </Card>
   );
@@ -61,16 +62,16 @@ function Overview() {
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Stat label="Active requests" value={x.active_requests} />
         <Stat label="Urgent requests" value={x.urgent_requests} tone="warn" />
-        <Stat label="Critical incidents" value={x.critical_incidents} tone="danger" />
-        <Stat label="Helpers online" value={x.helpers_online} />
+        <Stat label="Critical incidents" value={x.critical_incidents} tone="danger" card={x.critical_incidents > 0 ? "peach" : undefined} />
+        <Stat label="Helpers online" value={x.helpers_online} card="lavender" />
         <Stat label="Unmatched requests" value={x.unmatched_requests} tone="warn" />
-        <Stat label="Completed today" value={x.completed_today} />
-        <Stat label="Avg response time" value={fmtDuration(x.avg_response_seconds)} />
+        <Stat label="Completed today" value={x.completed_today} card="mint" />
+        <Stat label="Avg response time" value={fmtDuration(x.avg_response_seconds)} card="yellow" />
         <Stat label="Open reports" value={x.open_reports} tone="warn" />
       </div>
       <section>
         <SectionTitle>Active critical incidents</SectionTitle>
-        {(inc.data ?? []).length === 0 ? <EmptyState icon="✅" title="No active incidents" /> : (
+        {(inc.data ?? []).length === 0 ? <EmptyState icon={<CheckCircle2 size={26} />} title="No active incidents" /> : (
           <ul className="space-y-2">{inc.data!.map((i) => (
             <li key={i.id}><Card className="!p-4 border-danger/40">
               <div className="flex flex-wrap items-center justify-between gap-2"><p className="font-semibold">{i.incident_id} · {i.situation.replace(/_/g, " ")}</p><Badge tone="danger">Level {i.escalation_level}</Badge></div>
@@ -234,7 +235,7 @@ function ReportsTab() {
   return (
     <div className="space-y-3">
       <Select aria-label="Status" value={st} onChange={(e) => setSt(e.target.value)} className="max-w-48"><option value="OPEN">Open</option><option value="UPHELD">Upheld</option><option value="DISMISSED">Dismissed</option></Select>
-      {r.loading ? <LoadingBlock /> : r.error ? <ErrorState message={r.error} onRetry={r.reload} /> : (r.data ?? []).length === 0 ? <EmptyState icon="✅" title="Nothing here" /> : r.data!.map((x) => (
+      {r.loading ? <LoadingBlock /> : r.error ? <ErrorState message={r.error} onRetry={r.reload} /> : (r.data ?? []).length === 0 ? <EmptyState icon={<CheckCircle2 size={26} />} title="Nothing here" /> : r.data!.map((x) => (
         <Card key={x.id} className="!p-4">
           <div className="flex flex-wrap items-center justify-between gap-2"><p className="font-semibold capitalize">{x.reason.replace("_", " ")} <span className="text-sm font-normal text-muted">about {x.target_user_id ? <Link className="underline" href={`/users/${x.target_user_id}`}>user #{x.target_user_id}</Link> : "a request"} · {timeAgo(x.created_at)}</span></p><Badge>{x.status}</Badge></div>
           {x.details && <p className="mt-1 text-sm">{x.details}</p>}
