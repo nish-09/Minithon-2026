@@ -75,23 +75,41 @@ export function listen(opts: {
   const rec = new C();
   rec.lang = opts.lang ?? "en-IN";
   rec.interimResults = true;
-  rec.continuous = false;
+  // continuous, so a short pause mid-sentence doesn't cut the session off; we end it ourselves after SILENCE_MS of quiet
+  rec.continuous = true;
   rec.maxAlternatives = 1;
-  let gotFinal = false;
+  const chunks: string[] = [];
+  let confidenceSum = 0;
+  let flushed = false;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const flush = () => {
+    clearTimeout(timer);
+    if (flushed) return;
+    flushed = true;
+    const text = chunks.join(" ").trim();
+    if (text) opts.onFinal(text, confidenceSum / chunks.length);
+    else opts.onInterim?.("");
+  };
+  const armSilenceTimer = () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => { flush(); try { rec.stop(); } catch { /* already stopped */ } }, SILENCE_MS);
+  };
   rec.onresult = (e) => {
     let interim = "";
     for (let i = e.resultIndex; i < e.results.length; i++) {
       const r = e.results[i];
       if (r.isFinal) {
-        gotFinal = true;
-        opts.onFinal(r[0].transcript.trim(), r[0].confidence ?? 1);
+        const t = r[0].transcript.trim();
+        if (t) { chunks.push(t); confidenceSum += r[0].confidence ?? 1; }
       } else interim += r[0].transcript;
     }
-    if (interim) opts.onInterim?.(interim);
+    const heard = [...chunks, interim.trim()].filter(Boolean).join(" ");
+    if (interim || heard) opts.onInterim?.(heard);
+    armSilenceTimer();
   };
   rec.onerror = (e) => opts.onError(e.error);
   rec.onend = () => {
-    if (!gotFinal) opts.onInterim?.("");
+    flush();
     opts.onEnd();
   };
   try {
@@ -101,8 +119,10 @@ export function listen(opts: {
     opts.onEnd();
     return null;
   }
-  return { stop: () => rec.stop() };
+  return { stop: () => { clearTimeout(timer); rec.stop(); } };
 }
+
+const SILENCE_MS = 2500;
 
 let voiceEnabled = true;
 export function setSpeechOutputEnabled(v: boolean) {

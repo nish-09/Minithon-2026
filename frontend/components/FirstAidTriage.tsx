@@ -41,16 +41,50 @@ export default function FirstAidTriage({ incidentId, emergencyNumber, hint, onEs
   }, []);
   useEffect(() => stopCamera, [stopCamera]);
 
+  // attach the stream once the <video> element is actually mounted (it only renders while camOn)
+  useEffect(() => {
+    const v = videoRef.current;
+    const s = streamRef.current;
+    if (!camOn || !v || !s) return;
+    v.srcObject = s;
+    void v.play().catch(() => {});
+    const track = s.getVideoTracks()[0];
+    const lost = () => { stopCamera(); setCamMsg("The camera stopped sending a picture. Another app or tab may be using it. Close it, then press “Use camera” again, or tick what you can see below."); };
+    track?.addEventListener("ended", lost);
+    // a live stream that never produces frames shows as a black box: say so instead of leaving it silent
+    const check = setTimeout(() => {
+      if (!v.videoWidth || track?.muted) setCamMsg("The camera is on but no picture is coming through. Check that its privacy shutter is open and no other app or tab is using it, then turn the camera off and on again. You can also tick what you can see below.");
+    }, 3000);
+    return () => { clearTimeout(check); track?.removeEventListener("ended", lost); };
+  }, [camOn, stopCamera]);
+
   async function allowCamera() {
     setCamAsk(false);
     setCamMsg(null);
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setCamMsg("The camera needs a secure page (https or localhost) and a supported browser. You can tick what you can see below instead.");
+      return;
+    }
+    stopCamera();
     try {
-      const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
+      let s: MediaStream;
+      try {
+        s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
+      } catch (e) {
+        // no rear camera / constraint can't be met (typical on laptops): retry with any camera
+        const n = (e as DOMException).name;
+        if (n === "NotAllowedError" || n === "SecurityError") throw e;
+        s = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      }
       streamRef.current = s;
       setCamOn(true);
-      requestAnimationFrame(() => { if (videoRef.current) { videoRef.current.srcObject = s; void videoRef.current.play().catch(() => {}); } });
-    } catch {
-      setCamMsg("The camera isn't available or was blocked. No problem: you can tick what you can see below instead.");
+    } catch (e) {
+      const n = (e as DOMException).name;
+      setCamMsg(
+        n === "NotAllowedError" || n === "SecurityError" ? "Camera access is blocked. Allow it from the lock icon in your browser's address bar, then try again. Or tick what you can see below."
+        : n === "NotFoundError" || n === "OverconstrainedError" ? "No camera was found on this device. You can tick what you can see below instead."
+        : n === "NotReadableError" || n === "AbortError" ? "The camera is in use by another app or tab. Close it and try again, or tick what you can see below."
+        : "The camera isn't available. No problem: you can tick what you can see below instead.");
     }
   }
 
@@ -64,7 +98,7 @@ export default function FirstAidTriage({ incidentId, emergencyNumber, hint, onEs
       c.width = v.videoWidth * scale; c.height = v.videoHeight * scale;
       c.getContext("2d")!.drawImage(v, 0, 0, c.width, c.height);
       const b64 = c.toDataURL("image/jpeg", 0.7).split(",")[1];
-      const r = await api<{ available: boolean; reason?: "not_configured" | "model_missing" | "failed"; model?: string; observations: string[] }>("/api/triage/vision", { method: "POST", body: { image_b64: b64, media_type: "image/jpeg", consent: true } });
+      const r = await api<{ available: boolean; reason?: "not_configured" | "model_missing" | "failed"; model?: string; observations: string[] }>("/api/triage/vision", { method: "POST", body: { image_b64: b64, media_type: "image/jpeg", consent: true }, timeoutMs: 100_000 });
       if (!r.available) {
         if (r.reason !== "failed") setCanAnalyse(false); // nothing to retry: hide the button for this session
         setCamMsg(r.reason === "not_configured"
@@ -138,7 +172,7 @@ export default function FirstAidTriage({ incidentId, emergencyNumber, hint, onEs
       )}
       {camOn && (
         <div className="space-y-2">
-          <video ref={videoRef} muted playsInline className="max-h-64 w-full rounded-2xl border-2 border-linestrong bg-black object-cover" aria-label="Your camera preview. It stays on this device." />
+          <video ref={videoRef} autoPlay muted playsInline onLoadedMetadata={(e) => { setCamMsg(null); void e.currentTarget.play().catch(() => {}); }}className="max-h-64 w-full rounded-2xl border-2 border-linestrong bg-black object-cover" aria-label="Your camera preview. It stays on this device." />
           <div className="flex flex-wrap gap-2">
             {canAnalyse && <Button size="sm" disabled={busy} onClick={() => void analyseFrame()}>Analyse this frame</Button>}
             <Button size="sm" variant="secondary" onClick={stopCamera}><CameraOff aria-hidden size={16} /> Turn camera off</Button>

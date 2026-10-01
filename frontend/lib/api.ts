@@ -40,10 +40,10 @@ export function setUnauthorizedHandler(fn: (() => void) | null) {
 
 type Method = "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
 
-export async function api<T = unknown>(path: string, opts: { method?: Method; body?: unknown; token?: string | null; signal?: AbortSignal } = {}): Promise<T> {
+export async function api<T = unknown>(path: string, opts: { method?: Method; body?: unknown; token?: string | null; signal?: AbortSignal; timeoutMs?: number } = {}): Promise<T> {
   const token = opts.token === undefined ? getToken() : opts.token;
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  const timer = setTimeout(() => controller.abort(), opts.timeoutMs ?? TIMEOUT_MS);
   opts.signal?.addEventListener("abort", () => controller.abort());
   let res: Response;
   try {
