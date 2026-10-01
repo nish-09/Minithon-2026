@@ -229,3 +229,27 @@ body::after { width: 300px; height: 300px; left: -100px; bottom: 60px; backgroun
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background-color: var(--line-strong);
 }
+
+/* ---- NEXA full-screen AI mode ---- */
+/* dark immersive stage: tokens are re-pointed so existing text/brand classes read on dark */
+.nexa-mode { --ink: #FFFFFF; --muted: rgb(255 255 255 / 0.75); --brand-text: #D9CCFF; --brand-ink: #302B3D; --glow: rgb(150 120 255 / 0.45); background: radial-gradient(90% 70% at 50% 35%, #2a1d5c 0%, #120d2b 60%, #07060f 100%); color: #fff; }
+.nexa-light { --ink: #302B3D; --muted: #716B7D; --brand-text: #63449F; color: #302B3D; }
+.nexa-text { text-shadow: 0 1px 2px rgb(0 0 0 / 0.8), 0 0 14px rgb(0 0 0 / 0.55); }
+.nexa-mode-in { animation: nexa-mode-in 0.45s var(--ease) both; }
+.nexa-mode-out { animation: nexa-mode-out 0.32s ease-in both; }
+@keyframes nexa-mode-in { from { opacity: 0; clip-path: circle(0% at calc(100% - 7rem) 2.5rem); } to { opacity: 1; clip-path: circle(150% at calc(100% - 7rem) 2.5rem); } }
+@keyframes nexa-mode-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: scale(1.03); } }
+.nexa-ambient { background: radial-gradient(60% 50% at 50% 42%, var(--glow), transparent 70%); transition: opacity 0.4s; opacity: 0.5; }
+.nexa-mode[data-mode="listening"] .nexa-ambient, .nexa-mode[data-mode="speaking"] .nexa-ambient { opacity: 1; }
+.nexa-mode[data-mode="matching"] .nexa-ambient { background: radial-gradient(60% 50% at 50% 42%, rgb(181 222 201 / 0.7), transparent 70%); opacity: 1; }
+@keyframes nexa-breathe { 0%, 100% { transform: scale(0.96); } 50% { transform: scale(1.04); } }
+.nexa-speaking { animation: nexa-talk 0.9s ease-in-out infinite; }
+.nexa-listening { filter: drop-shadow(0 0 22px var(--glow)); }
+@keyframes nexa-talk { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-3px) scale(1.012); } }
+.nexa-bar { height: 8px; opacity: 0.35; transition: opacity 0.3s; }
+.nexa-bar-on { opacity: 1; animation: nexa-wave 0.8s ease-in-out infinite; }
+@keyframes nexa-wave { 0%, 100% { height: 8px; } 50% { height: 56px; } }
+/* immersive layer: the model fills the viewport, UI floats above it as glass */
+.nexa-glass { background: rgb(18 13 43 / 0.5); backdrop-filter: blur(18px) saturate(1.4); -webkit-backdrop-filter: blur(18px) saturate(1.4); border: 1px solid rgb(255 255 255 / 0.28); box-shadow: 0 8px 28px rgb(0 0 0 / 0.35); }
+.nexa-mode::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 0.5s; box-shadow: inset 0 0 120px 10px var(--glow); }
+.nexa-mode[data-mode="listening"]::after, .nexa-mode[data-mode="speaking"]::after { opacity: 1; }

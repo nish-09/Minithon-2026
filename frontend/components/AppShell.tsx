@@ -10,7 +10,7 @@ import { useToast } from "@/lib/hooks";
 import { useLiveEvents, useRealtime } from "@/lib/realtime";
 import type { IncidentState } from "@/lib/types";
 import { Avatar, ErrorState, Spinner, cx } from "./ui";
-import { VoicePanel } from "./VoicePanel";
+import { NexaMode } from "./NexaMode";
 import { VoiceCtx } from "./voice-context";
 
 const NAV = [
@@ -346,7 +346,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       )}
 
       <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">{announce}</div>
-      <VoicePanel open={voiceOpen} onClose={() => setVoiceOpen(false)} initialText={voiceText} />
+      <NexaMode open={voiceOpen} onClose={() => setVoiceOpen(false)} initialText={voiceText} />
     </div>
     </VoiceCtx.Provider>
   );
