@@ -1,5 +1,5 @@
 "use client";
-import { Bell, BookOpen, Home, LogOut, Map as MapIcon, Menu, Mic, PanelLeftClose, PanelLeftOpen, PenLine, ShieldCheck, UserRound, Users, X } from "lucide-react";
+import { Bell, BookOpen, Home, LogOut, Map as MapIcon, Menu, PanelLeftClose, PanelLeftOpen, PenLine, ShieldCheck, UserRound, Users, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
@@ -11,6 +11,7 @@ import { useLiveEvents, useRealtime } from "@/lib/realtime";
 import type { IncidentState } from "@/lib/types";
 import { Avatar, ErrorState, Spinner, cx } from "./ui";
 import { NexaMode } from "./NexaMode";
+import NexaFab from "./NexaFab";
 import { VoiceCtx } from "./voice-context";
 
 const NAV = [
@@ -174,7 +175,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               className={cx(
                 "flex min-h-12 items-center rounded-2xl font-bold transition-colors duration-150",
                 collapsed ? "justify-center p-2 mx-auto w-11 h-11" : "gap-3 px-3 w-full",
-                active(n.href) ? "clay-btn bg-lavender text-ink" : "border border-transparent text-ink hover:bg-white/60"
+                active(n.href) ? "clay-btn bg-lavender text-ink" : "border border-transparent text-ink hover:bg-surface/60"
               )}
             >
               <n.icon aria-hidden size={20} className="shrink-0" />
@@ -211,7 +212,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 onClick={() => void logout().then(() => router.replace("/login"))}
                 title="Log out"
                 aria-label="Log out"
-                className="grid h-9 w-9 place-items-center rounded-xl text-muted hover:bg-white/60 hover:text-brandtext transition-colors"
+                className="grid h-9 w-9 place-items-center rounded-xl text-muted hover:bg-surface/60 hover:text-brandtext transition-colors"
               >
                 <LogOut aria-hidden size={18} />
               </button>
@@ -226,7 +227,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <button
             type="button"
             onClick={() => setMobileDrawerOpen(true)}
-            className="clay-btn clay-btn-secondary grid h-11 w-11 shrink-0 place-items-center !rounded-full text-ink hover:bg-white/80 active:scale-95 transition-all lg:hidden"
+            className="clay-btn clay-btn-secondary grid h-11 w-11 shrink-0 place-items-center !rounded-full text-ink hover:bg-surface/80 active:scale-95 transition-all lg:hidden"
             aria-label="Open navigation menu"
             title="Open navigation menu"
           >
@@ -237,7 +238,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <button
             type="button"
             onClick={toggleCollapse}
-            className="clay-btn clay-btn-secondary hidden h-11 w-11 shrink-0 place-items-center !rounded-full text-ink hover:bg-white/80 active:scale-95 transition-all lg:grid"
+            className="clay-btn clay-btn-secondary hidden h-11 w-11 shrink-0 place-items-center !rounded-full text-ink hover:bg-surface/80 active:scale-95 transition-all lg:grid"
             aria-label={collapsed ? "Expand sidebar (Ctrl+B)" : "Collapse sidebar (Ctrl+B)"}
             title={collapsed ? "Expand sidebar (Ctrl+B)" : "Collapse sidebar (Ctrl+B)"}
           >
@@ -251,9 +252,6 @@ export function AppShell({ children }: { children: ReactNode }) {
             <span aria-hidden>{connected ? "●" : "▲"}</span> {connected ? "Live updates on" : "Reconnecting…"}
           </span>
           <div className="ml-auto flex items-center gap-2">
-            <button onClick={() => openVoice()} className="clay-btn clay-btn-secondary flex h-11 min-w-11 items-center justify-center gap-1.5 whitespace-nowrap !rounded-full px-3" aria-label="Talk to NEXA">
-              <Mic aria-hidden size={18} /> <span className="hidden text-sm font-bold sm:inline">Talk to NEXA</span>
-            </button>
             <Link href="/notifications" className="clay-btn clay-btn-secondary relative grid h-11 w-11 place-items-center !rounded-full" aria-label={`Notifications${unread ? `, ${unread} unread` : ""}`}>
               <Bell aria-hidden size={20} />
               {unread > 0 && <span className="absolute right-1 top-1 grid h-5 min-w-5 place-items-center rounded-full bg-dangersolid px-1 text-[11px] font-bold text-white">{unread > 99 ? "99+" : unread}</span>}
@@ -319,7 +317,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   aria-current={active(n.href) ? "page" : undefined}
                   className={cx(
                     "flex min-h-12 items-center gap-3 rounded-2xl px-3 font-bold transition",
-                    active(n.href) ? "clay-btn bg-lavender text-ink" : "border border-transparent text-ink transition-colors duration-150 hover:bg-white/60"
+                    active(n.href) ? "clay-btn bg-lavender text-ink" : "border border-transparent text-ink transition-colors duration-150 hover:bg-surface/60"
                   )}
                 >
                   <n.icon aria-hidden size={20} />
@@ -346,6 +344,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       )}
 
       <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">{announce}</div>
+      <NexaFab onOpen={openVoice} hidden={voiceOpen} />
       <NexaMode open={voiceOpen} onClose={() => setVoiceOpen(false)} initialText={voiceText} />
     </div>
     </VoiceCtx.Provider>

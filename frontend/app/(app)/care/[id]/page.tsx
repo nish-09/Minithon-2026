@@ -3,6 +3,7 @@ import { CheckCircle2, Footprints, Hourglass, Mic, Phone } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import FirstAidTriage from "@/components/FirstAidTriage";
 import Map, { type MapMarker } from "@/components/Map";
 import { Badge, Button, Card, ErrorState, Input, LoadingBlock, Modal, Notice, Toggle, cx } from "@/components/ui";
 import { api, errorMessage } from "@/lib/api";
@@ -36,6 +37,7 @@ export default function CarePage() {
   const [voiceOut, setVoiceOut] = useState(() => speechOutputEnabled());
   const [handsFree, setHandsFree] = useState(true);
   const [err, setErr] = useState<string | null>(null);
+  const [lastSaid, setLastSaid] = useState("");
   const [endOpen, setEndOpen] = useState(false);
   const [log, setLog] = useState<LogRow[] | null>(null);
   const l = useRef<Listener | null>(null);
@@ -78,7 +80,7 @@ export default function CarePage() {
   async function call<T extends CareReply>(fn: () => Promise<T>, userText?: string) {
     setBusy(true);
     setErr(null);
-    if (userText) setLines((x) => [...x, { from: "you", text: userText }]);
+    if (userText) { setLines((x) => [...x, { from: "you", text: userText }]); setLastSaid(userText); }
     try {
       apply(await fn());
     } catch (e) {
@@ -212,6 +214,9 @@ export default function CarePage() {
               <Toggle checked={handsFree} onChange={setHandsFree} label="Hands-free" description="NEXA listens again after it speaks." />
             </div>
           </Card>
+
+          {/* assistive visual first-aid check: opens (asking about the camera, never starting it) when an injury is described */}
+          <FirstAidTriage incidentId={iid} emergencyNumber={s.emergency_number} hint={lastSaid} onEscalate={() => void call(() => api<CareReply>(`/api/incidents/${iid}/escalate`, { method: "POST", body: { emergency_contacted: false, note: "first-aid check: more help requested" } }))} />
         </>
       )}
 

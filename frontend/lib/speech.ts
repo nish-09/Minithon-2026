@@ -111,6 +111,17 @@ export function setSpeechOutputEnabled(v: boolean) {
 }
 export const speechOutputEnabled = () => voiceEnabled;
 
+/* Speech progress feed for lip sync. Browsers expose no audio from speechSynthesis, so the character follows the
+   text: word-boundary events (when the voice supplies them) re-anchor its position, and between events it advances
+   at the speaking rate. */
+export type SpeechEvent = { type: "start"; text: string; rate: number } | { type: "boundary"; charIndex: number } | { type: "end" };
+const speechListeners = new Set<(e: SpeechEvent) => void>();
+export function subscribeSpeech(fn: (e: SpeechEvent) => void): () => void {
+  speechListeners.add(fn);
+  return () => { speechListeners.delete(fn); };
+}
+const emitSpeech = (e: SpeechEvent) => speechListeners.forEach((fn) => fn(e));
+
 export function speak(text: string, opts: { onEnd?: () => void; rate?: number } = {}) {
   if (!voiceEnabled || !speechSynthesisSupported() || !text) {
     opts.onEnd?.();
@@ -121,8 +132,10 @@ export function speak(text: string, opts: { onEnd?: () => void; rate?: number } 
     const u = new SpeechSynthesisUtterance(text);
     u.rate = opts.rate ?? 0.95;
     u.lang = "en-IN";
-    u.onend = () => opts.onEnd?.();
-    u.onerror = () => opts.onEnd?.();
+    u.onstart = () => emitSpeech({ type: "start", text, rate: u.rate });
+    u.onboundary = (e) => emitSpeech({ type: "boundary", charIndex: e.charIndex });
+    u.onend = () => { emitSpeech({ type: "end" }); opts.onEnd?.(); };
+    u.onerror = () => { emitSpeech({ type: "end" }); opts.onEnd?.(); };
     window.speechSynthesis.speak(u);
   } catch {
     opts.onEnd?.();
@@ -131,4 +144,31 @@ export function speak(text: string, opts: { onEnd?: () => void; rate?: number } 
 
 export function cancelSpeech() {
   if (speechSynthesisSupported()) window.speechSynthesis.cancel();
+  emitSpeech({ type: "end" });
+}
+
+/** Always-on recognition used only for the "Hey NEXA" wake phrase. Restarts itself until stop() is called. */
+export function listenForWake(opts: { onTranscript: (t: string) => void; onFatal: (code: string) => void; lang?: string }): Listener | null {
+  const C = ctor();
+  if (!C) return null;
+  let stopped = false;
+  let rec: SR | null = null;
+  const start = () => {
+    if (stopped) return;
+    rec = new C();
+    rec.lang = opts.lang ?? "en-IN";
+    rec.interimResults = true;
+    rec.continuous = true;
+    rec.maxAlternatives = 1;
+    rec.onresult = (e) => {
+      for (let i = e.resultIndex; i < e.results.length; i++) opts.onTranscript(e.results[i][0].transcript);
+    };
+    rec.onerror = (e) => {
+      if (e.error === "not-allowed" || e.error === "service-not-allowed" || e.error === "audio-capture") { stopped = true; opts.onFatal(e.error); }
+    };
+    rec.onend = () => { if (!stopped) setTimeout(start, 400); };
+    try { rec.start(); } catch { setTimeout(start, 1000); }
+  };
+  start();
+  return { stop: () => { stopped = true; try { rec?.abort(); } catch { /* already stopped */ } } };
 }

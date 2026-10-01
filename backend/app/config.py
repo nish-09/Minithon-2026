@@ -20,6 +20,12 @@ class Settings(BaseSettings):
     anthropic_api_key: str | None = None
     llm_model: str = "claude-haiku-4-5-20251001"
 
+    # Optional LOCAL vision model for the first-aid camera check (Ollama, free, runs on this machine; pictures never leave it).
+    # Used when no Anthropic key is set. Install once with: ollama pull qwen2.5vl:3b
+    ollama_url: str = "http://localhost:11434"
+    vision_model: str = "qwen2.5vl:3b"
+    vision_timeout_s: float = 90.0  # the first call loads the model into memory
+
     # Optional server-side speech-to-text (OpenAI-compatible /audio/transcriptions endpoint)
     stt_url: str | None = None
     stt_api_key: str | None = None

@@ -3,6 +3,7 @@ import { History, Mic, Phone, Settings, Square, Volume2, VolumeX, X } from "luci
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api, errorMessage } from "@/lib/api";
+import { emotionFromText, type Emotion } from "@/lib/emotion";
 import { useLocation } from "@/lib/hooks";
 import { cancelSpeech, listen, speak, speechErrorMessage, speechOutputEnabled, setSpeechOutputEnabled, useSpeechSupport, type Listener } from "@/lib/speech";
 import type { MatchResult, VoiceResult } from "@/lib/types";
@@ -56,6 +57,10 @@ export function NexaMode({ open, onClose, initialText }: { open: boolean; onClos
   const supported = useSpeechSupport();
 
   const mode: Mode = emergencyId !== null ? "emergency" : listening ? "listening" : matching ? "matching" : busy ? "understanding" : speaking ? "speaking" : "idle";
+
+  // the character reflects what the person just said (concerned for emergencies, warm for thanks, thoughtful for questions)
+  const lastUser = [...bubbles].reverse().find((b) => b.from === "user")?.text;
+  const emotion: Emotion = mode === "emergency" ? "worried" : mode === "understanding" ? "thinking" : emotionFromText(lastUser);
 
   // Leaving plays the exit transition first; the parent only hides us afterwards.
   const exit = useCallback(
@@ -207,7 +212,7 @@ export function NexaMode({ open, onClose, initialText }: { open: boolean; onClos
     >
       {/* the model fills the whole viewport; every other piece floats directly over it */}
       <div className={cx("nexa-model absolute inset-0", mode === "speaking" && "nexa-speaking", mode === "listening" && "nexa-listening")}>
-        <NexaAvatar className="h-full w-full" />
+        <NexaAvatar className="h-full w-full" mode={mode} emotion={emotion} />
       </div>
       {/* state tint + edge glow; never intercepts input */}
       <div aria-hidden className="nexa-ambient pointer-events-none absolute inset-0" />

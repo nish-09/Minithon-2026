@@ -9,7 +9,7 @@ describe("NEXA custom map style", () => {
   });
 
   it("uses the pastel community palette, not a conventional navigation look", () => {
-    expect(PALETTE.land).toBe("#F7F5FC"); // lavender/cream land
+    expect(PALETTE.land).toBe("#E8E8EC"); // soft cool-grey land
     expect(PALETTE.water).toBe("#D7EAF5"); // pastel blue
     expect(PALETTE.park).toBe("#DCECE2"); // pastel sage
     expect(PALETTE.label).toBe("#373342"); // dark plum labels

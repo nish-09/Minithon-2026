@@ -45,8 +45,8 @@ const UI: [string, string, string][] = [
 
 describe("Bright Claymorphism tokens meet WCAG 2.2 AA", () => {
   it("uses the specified palette", () => {
-    expect([resolve("bg").toUpperCase(), resolve("lavender").toUpperCase(), resolve("yellow").toUpperCase(), resolve("mint").toUpperCase(), resolve("peach").toUpperCase(), resolve("sky").toUpperCase()]).toEqual(["#F5F2FA", "#B9A8E6", "#F5EDCE", "#B5DEC9", "#F4B7A8", "#B7DDF2"]);
-    expect([resolve("ink").toUpperCase(), resolve("muted").toUpperCase()]).toEqual(["#302B3D", "#716B7D"]);
+    expect([resolve("bg").toUpperCase(), resolve("lavender").toUpperCase(), resolve("yellow").toUpperCase(), resolve("mint").toUpperCase(), resolve("peach").toUpperCase(), resolve("sky").toUpperCase()]).toEqual(["#E8E8EC", "#B9A8E6", "#F5EDCE", "#B5DEC9", "#F4B7A8", "#B7DDF2"]);
+    expect([resolve("ink").toUpperCase(), resolve("muted").toUpperCase()]).toEqual(["#292733", "#5F5D69"]);
   });
   it.each(TEXT)("text %s on %s >= 3.4:1 (%s)", (fg, bg) => {
     expect(ratio(resolve(fg), resolve(bg))).toBeGreaterThanOrEqual(3.4);

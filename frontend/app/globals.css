@@ -11,10 +11,12 @@
    ========================================================================== */
 :root {
   /* palette */
-  --bg: #F5F2FA;            /* main page */
-  --bg-alt: #EAE5F5;        /* supporting page tone */
-  --surface: #FFFFFF;       /* neutral clay */
-  --surface-2: #F0ECF8;     /* recessed wells, inputs */
+  --bg: #E8E8EC;            /* main page (soft cool grey) */
+  --bg-alt: #DEDEE4;        /* supporting page tone */
+  --surface: #F0F0F3;       /* neutral clay (card) */
+  --surface-2: #E4E4E9;     /* recessed wells, inputs */
+  --surface-3: #D8D8DF;     /* subtle / tertiary surface */
+  --input-focus: #F4F4F7;   /* input while focused */
   --lavender: #B9A8E6;
   --yellow: #F5EDCE;
   --mint: #B5DEC9;
@@ -22,17 +24,17 @@
   --sky: #B7DDF2;
 
   /* text */
-  --ink: #302B3D;           /* primary */
-  --muted: #716B7D;         /* secondary (AA on every surface) */
+  --ink: #292733;           /* primary */
+  --muted: #5F5D69;         /* secondary (AA on every surface) */
   --faint: #777183;         /* timestamps/metadata on decoration only (below AA: never the only carrier of meaning) */
 
   /* roles (existing component classes keep working through these) */
-  --line: #E6E1EE;          /* decorative dividers */
+  --line: #CFCFD8;          /* decorative dividers */
   --line-strong: #777183;   /* control borders, >= 3:1 */
   --brand: var(--lavender);
   --brand-ink: var(--ink);
   --brand-text: #63449F;    /* readable violet for links / selected text */
-  --brand-soft: #EAE5F5;
+  --brand-soft: #E1DCF0;
   --accent: #285C7C;
   --accent-soft: var(--sky);
   --ok: #287A53;
@@ -49,15 +51,15 @@
   --glow: rgb(123 97 255 / 0.35);
 
   /* soft, cool-toned, low-opacity depth */
-  --sh-dark: rgb(92 110 140 / 0.16);
-  --sh-light: rgb(255 255 255 / 0.8);
+  --sh-dark: rgb(78 78 105 / 0.24);
+  --sh-light: rgb(255 255 255 / 0.75);
   --clay-radius: 24px;
   --clay-out: 8px 8px 18px var(--sh-dark), -6px -6px 14px var(--sh-light);
   --clay-out-sm: 4px 4px 10px var(--sh-dark), -3px -3px 8px var(--sh-light);
-  --clay-out-lg: 12px 14px 28px rgb(92 110 140 / 0.2), -8px -8px 18px var(--sh-light);
-  --clay-in: inset 2px 2px 4px rgb(255 255 255 / 0.85), inset -2px -3px 7px rgb(92 110 140 / 0.1);
-  --clay-recess: inset 3px 3px 7px rgb(92 110 140 / 0.17), inset -3px -3px 7px rgb(255 255 255 / 0.85);
-  --clay-pressed: inset 3px 3px 8px rgb(92 110 140 / 0.3), inset -2px -2px 5px rgb(255 255 255 / 0.4);
+  --clay-out-lg: 12px 14px 28px rgb(78 78 105 / 0.28), -8px -8px 18px var(--sh-light);
+  --clay-in: inset 2px 2px 4px rgb(255 255 255 / 0.85), inset -2px -3px 7px rgb(78 78 105 / 0.14);
+  --clay-recess: inset 3px 3px 7px rgb(78 78 105 / 0.24), inset -3px -3px 7px rgb(255 255 255 / 0.85);
+  --clay-pressed: inset 3px 3px 8px rgb(78 78 105 / 0.36), inset -2px -2px 5px rgb(255 255 255 / 0.4);
   --ease: cubic-bezier(0.22, 0.8, 0.3, 1);
 }
 
@@ -99,7 +101,7 @@ html { color-scheme: light; }
 body {
   background-color: var(--bg);
   background-image:
-    radial-gradient(900px 480px at 8% -8%, #eef4ff 0%, transparent 60%),
+    radial-gradient(900px 480px at 8% -8%, #F0F0F5 0%, transparent 60%),
     radial-gradient(800px 500px at 100% 0%, var(--bg-alt) 0%, transparent 60%);
   background-attachment: fixed;
   color: var(--ink);
@@ -124,7 +126,7 @@ body::after { width: 300px; height: 300px; left: -100px; bottom: 60px; backgroun
     background: var(--surface);
     border-radius: var(--clay-radius);
     box-shadow: var(--clay-out), var(--clay-in);
-    border: 1px solid rgb(255 255 255 / 0.7);
+    border: 1px solid rgb(255 255 255 / 0.55);
   }
   .clay-card-hover { transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease); }
   .clay-card-hover:hover { transform: translateY(-2px); box-shadow: var(--clay-out-lg), var(--clay-in); }
@@ -145,7 +147,7 @@ body::after { width: 300px; height: 300px; left: -100px; bottom: 60px; backgroun
     box-shadow: var(--clay-recess);
     transition: box-shadow 0.18s var(--ease), border-color 0.18s var(--ease), background 0.18s var(--ease);
   }
-  .clay-input:focus { background: #fff; border-color: #63449F; box-shadow: var(--clay-recess), 0 0 0 4px var(--glow); }
+  .clay-input:focus { background: var(--input-focus); border-color: #63449F; box-shadow: var(--clay-recess), 0 0 0 4px var(--glow); }
 
   /* ---- buttons: raised, hover lifts 1px, press sinks 1px ---- */
   .clay-btn {
@@ -153,17 +155,17 @@ body::after { width: 300px; height: 300px; left: -100px; bottom: 60px; backgroun
     font-weight: 700;
     color: var(--ink);
     border: 1px solid rgb(255 255 255 / 0.55);
-    box-shadow: var(--clay-out-sm), inset 2px 2px 4px rgb(255 255 255 / 0.55), inset -2px -3px 6px rgb(92 110 140 / 0.14);
+    box-shadow: var(--clay-out-sm), inset 2px 2px 4px rgb(255 255 255 / 0.55), inset -2px -3px 6px rgb(78 78 105 / 0.18);
     transition: transform 0.15s var(--ease), box-shadow 0.15s var(--ease), filter 0.15s var(--ease);
   }
-  .clay-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 6px 7px 14px var(--sh-dark), -4px -4px 10px var(--sh-light), inset 2px 2px 4px rgb(255 255 255 / 0.55), inset -2px -3px 6px rgb(92 110 140 / 0.14); }
+  .clay-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 6px 7px 14px var(--sh-dark), -4px -4px 10px var(--sh-light), inset 2px 2px 4px rgb(255 255 255 / 0.55), inset -2px -3px 6px rgb(78 78 105 / 0.18); }
   .clay-btn:active:not(:disabled) { transform: translateY(1px); box-shadow: var(--clay-pressed); }
   .clay-btn:disabled { box-shadow: none; filter: saturate(0.6); }
   .clay-btn-secondary { background: var(--surface); border: 2px solid var(--line-strong); box-shadow: var(--clay-out-sm), var(--clay-in); }
   .clay-pill { border-radius: 999px; box-shadow: var(--clay-out-sm), var(--clay-in); }
 
   /* ---- skeleton loading (layout-preserving) ---- */
-  .skeleton { background: linear-gradient(90deg, var(--surface-2) 0%, #f7faff 50%, var(--surface-2) 100%); background-size: 200% 100%; border-radius: 14px; box-shadow: var(--clay-recess); animation: nexa-shimmer 1.6s ease-in-out infinite; }
+  .skeleton { background: linear-gradient(90deg, var(--surface-2) 0%, var(--surface) 50%, var(--surface-2) 100%); background-size: 200% 100%; border-radius: 14px; box-shadow: var(--clay-recess); animation: nexa-shimmer 1.6s ease-in-out infinite; }
 
   /* ---- emergency components: clarity over decoration (flat, white, thick border, >= 7:1 text) ---- */
   .emergency-panel { background: #ffffff; color: #1a0000; border: 4px solid #8f1111; border-radius: 20px; box-shadow: none; }
@@ -188,8 +190,8 @@ body::after { width: 300px; height: 300px; left: -100px; bottom: 60px; backgroun
 .emergency-panel *, .emergency-strip *, .emergency-btn, .emergency-btn-secondary { animation: none !important; }
 
 /* ---- custom pastel map (MapLibre) ---- */
-.maplibregl-map { font-family: inherit; border-radius: 22px; background: #F7F5FC; }
-.maplibregl-ctrl-attrib { background: rgb(255 255 255 / 0.92) !important; color: #302B3D !important; }
+.maplibregl-map { font-family: inherit; border-radius: 22px; background: #E8E8EC; }
+.maplibregl-ctrl-attrib { background: rgb(240 240 243 / 0.92) !important; color: #292733 !important; }
 .maplibregl-ctrl-attrib a { color: #285C7C !important; }
 .nexa-marker { display: flex; align-items: center; justify-content: center; gap: 4px; min-width: 44px; min-height: 44px; padding: 0; background: transparent; border: 0; cursor: pointer; }
 .nexa-marker .shape {
@@ -233,7 +235,7 @@ body::after { width: 300px; height: 300px; left: -100px; bottom: 60px; backgroun
 /* ---- NEXA full-screen AI mode ---- */
 /* dark immersive stage: tokens are re-pointed so existing text/brand classes read on dark */
 .nexa-mode { --ink: #FFFFFF; --muted: rgb(255 255 255 / 0.75); --brand-text: #D9CCFF; --brand-ink: #302B3D; --glow: rgb(150 120 255 / 0.45); background: radial-gradient(90% 70% at 50% 35%, #2a1d5c 0%, #120d2b 60%, #07060f 100%); color: #fff; }
-.nexa-light { --ink: #302B3D; --muted: #716B7D; --brand-text: #63449F; color: #302B3D; }
+.nexa-light { --ink: #292733; --muted: #5F5D69; --brand-text: #63449F; color: #302B3D; }
 .nexa-text { text-shadow: 0 1px 2px rgb(0 0 0 / 0.8), 0 0 14px rgb(0 0 0 / 0.55); }
 .nexa-mode-in { animation: nexa-mode-in 0.45s var(--ease) both; }
 .nexa-mode-out { animation: nexa-mode-out 0.32s ease-in both; }

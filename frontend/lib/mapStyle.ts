@@ -2,21 +2,21 @@ import type { StyleSpecification } from "maplibre-gl";
 
 /** NEXA's illustrated community-map style with cohesive lavender-pastel geographic colors. */
 export const PALETTE = {
-  land: "#F7F5FC",
-  residential: "#EAE5F5",
+  land: "#E8E8EC",
+  residential: "#DEDEE4",
   commercial: "#F5E4D9",
   institution: "#F5EDCE", // Community spaces
   park: "#DCECE2",        // Parks / greenery
   water: "#D7EAF5",       // Water
-  building: "#F0ECF8",    // Dense urban areas
+  building: "#D8D8DF",    // Dense urban areas
   roadCasing: "#947FCB",  // Road outlines
   roadMajor: "#B9A8E6",   // Major roads
   roadMid: "#B9A8E6",
-  roadMinor: "#FFFFFF",   // Local roads
-  boundary: "#D9D3E5",    // Boundaries
+  roadMinor: "#F0F0F3",   // Local roads
+  boundary: "#C4C4CE",    // Boundaries
   label: "#373342",       // Geographic labels
   labelSecondary: "#777183", // Secondary labels
-  halo: "#F7F5FC",
+  halo: "#E8E8EC",
 };
 
 const FONT_REG = ["Noto Sans Regular"];
@@ -35,6 +35,13 @@ function road(id: string, classes: string[], color: string, widths: [number, num
 
 export const nexaMapStyle = {
   version: 8,
+  // true 3D globe when zoomed out, blending to the flat street map at city zoom
+  projection: { type: ["interpolate", ["linear"], ["zoom"], 8, "vertical-perspective", 11, "mercator"] },
+  sky: {
+    "sky-color": "#C9BDF0", "horizon-color": "#E8E8EC", "fog-color": "#E8E8EC",
+    "sky-horizon-blend": 0.6, "horizon-fog-blend": 0.6, "fog-ground-blend": 0.4,
+    "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 0, 1, 8, 1, 12, 0],
+  },
   glyphs: "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf",
   sources: { om: { type: "vector", url: "https://tiles.openfreemap.org/planet" } },
   layers: [

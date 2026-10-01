@@ -26,7 +26,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             ["Care", "Voice-guided support until real help arrives."],
           ].map(([t, d]) => (
             <div key={t} className="flex gap-4">
-              <span className="mt-1 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white/70 text-sm font-bold shadow">{t[0]}</span>
+              <span className="mt-1 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-surface/70 text-sm font-bold shadow">{t[0]}</span>
               <p>
                 <b>{t}.</b> <span className="text-ink/80">{d}</span>
               </p>

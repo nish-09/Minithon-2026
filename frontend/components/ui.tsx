@@ -12,7 +12,7 @@ const VARIANT: Record<Variant, string> = {
   highlight: "clay-btn bg-yellow",
   info: "clay-btn bg-sky",
   secondary: "clay-btn clay-btn-secondary",
-  ghost: "rounded-2xl font-semibold text-ink transition-colors duration-150 hover:bg-white/60",
+  ghost: "rounded-2xl font-semibold text-ink transition-colors duration-150 hover:bg-surface/60",
   danger: "clay-btn bg-dangersolid text-white",
   success: "clay-btn bg-mint",
   emergency: "emergency-btn",
@@ -133,9 +133,9 @@ export function VerifiedBadge({ verified, label = "Identity" }: { verified: bool
 export function Avatar({ name, src, size = 40 }: { name: string; src?: string | null; size?: number }) {
   return src ? (
     // eslint-disable-next-line @next/next/no-img-element
-    <img src={src} alt="" width={size} height={size} className="rounded-full border-2 border-white object-cover shadow" style={{ width: size, height: size }} />
+    <img src={src} alt="" width={size} height={size} className="rounded-full border-2 border-surface object-cover shadow" style={{ width: size, height: size }} />
   ) : (
-    <span aria-hidden className="grid shrink-0 place-items-center rounded-full border-2 border-white bg-lavender font-bold text-ink shadow" style={{ width: size, height: size, fontSize: size * 0.38 }}>
+    <span aria-hidden className="grid shrink-0 place-items-center rounded-full border-2 border-surface bg-lavender font-bold text-ink shadow" style={{ width: size, height: size, fontSize: size * 0.38 }}>
       {initials(name)}
     </span>
   );
@@ -254,7 +254,7 @@ export function Toggle({ checked, onChange, label, description, disabled }: { ch
       >
         <span className="w-7 text-right text-xs font-extrabold" aria-hidden>{checked ? "On" : "Off"}</span>
         <span className={cx("relative h-8 w-14 rounded-full border-2 transition-colors", checked ? "border-[#4a2fb0] bg-lavender" : "border-linestrong bg-surface2")} style={{ boxShadow: "var(--clay-recess)" }}>
-          <span className={cx("absolute top-0.5 h-6 w-6 rounded-full border-2 bg-white transition-all", checked ? "left-[26px] border-[#4a2fb0]" : "left-0.5 border-linestrong")} style={{ boxShadow: "var(--clay-out-sm)" }} />
+          <span className={cx("absolute top-0.5 h-6 w-6 rounded-full border-2 bg-surface transition-all", checked ? "left-[26px] border-[#4a2fb0]" : "left-0.5 border-linestrong")} style={{ boxShadow: "var(--clay-out-sm)" }} />
         </span>
       </button>
     </div>
@@ -306,7 +306,7 @@ export function Segmented<T extends string>({ value, onChange, options, label }:
   return (
     <div role="radiogroup" aria-label={label} className="clay-well inline-flex flex-wrap gap-1 p-1">
       {options.map((o) => (
-        <button key={o.value} role="radio" aria-checked={value === o.value} onClick={() => onChange(o.value)} className={cx("min-h-11 rounded-2xl px-3.5 text-sm font-bold transition", value === o.value ? "clay-btn bg-lavender" : "text-ink transition-colors duration-150 hover:bg-white/70")}>
+        <button key={o.value} role="radio" aria-checked={value === o.value} onClick={() => onChange(o.value)} className={cx("min-h-11 rounded-2xl px-3.5 text-sm font-bold transition", value === o.value ? "clay-btn bg-lavender" : "text-ink transition-colors duration-150 hover:bg-surface/70")}>
           <span aria-hidden>{value === o.value ? "✓ " : ""}</span>
           {o.label}
         </button>

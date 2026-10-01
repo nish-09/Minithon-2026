@@ -95,6 +95,7 @@ export default function MapView({
   const [ready, setReady] = useState(false);
   const [tilesFailed, setTilesFailed] = useState(false);
   const [popupText, setPopupText] = useState("");
+  const [globe, setGlobe] = useState(false);
 
   useEffect(() => {
     if (!box.current) return;
@@ -131,6 +132,25 @@ export default function MapView({
     // the map instance is created once; data effects below keep it in sync
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // globe view: zoom out to the 3D Earth and spin it slowly until the person touches the map or turns it off
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !ready || !globe) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    map.flyTo({ center: [center[1], center[0]], zoom: 1.6, pitch: 0, bearing: 0, duration: reduce ? 0 : 1800 });
+    let raf = 0, spinning = false;
+    const spin = () => {
+      if (!spinning) return;
+      const c = map.getCenter();
+      map.jumpTo({ center: [c.lng + 0.12, c.lat] });
+      raf = requestAnimationFrame(spin);
+    };
+    const t = setTimeout(() => { if (!reduce) { spinning = true; raf = requestAnimationFrame(spin); } }, 1900);
+    const stop = () => { spinning = false; cancelAnimationFrame(raf); };
+    map.on("mousedown", stop); map.on("touchstart", stop); map.on("wheel", stop);
+    return () => { clearTimeout(t); stop(); map.off("mousedown", stop); map.off("touchstart", stop); map.off("wheel", stop); };
+  }, [globe, ready, center]);
 
   // recentre / fit
   const key = markers.map((m) => m.id).join(",");
@@ -181,7 +201,8 @@ export default function MapView({
       <div className="absolute left-3 top-3 z-10 flex flex-col gap-2">
         <button type="button" className={btn} aria-label="Zoom in" onClick={() => mapRef.current?.zoomIn()}><span aria-hidden>＋</span></button>
         <button type="button" className={btn} aria-label="Zoom out" onClick={() => mapRef.current?.zoomOut()}><span aria-hidden>－</span></button>
-        <button type="button" className={btn} aria-label="Recenter map" onClick={() => mapRef.current?.easeTo({ center: [center[1], center[0]], zoom })}><span aria-hidden>◎</span></button>
+        <button type="button" className={btn} aria-label="Recenter map" onClick={() => { setGlobe(false); mapRef.current?.easeTo({ center: [center[1], center[0]], zoom }); }}><span aria-hidden>◎</span></button>
+        <button type="button" className={btn} aria-label={globe ? "Leave globe view" : "Show 3D globe"} aria-pressed={globe} onClick={() => { if (globe) mapRef.current?.easeTo({ center: [center[1], center[0]], zoom }); setGlobe((g) => !g); }}><span aria-hidden>🌍</span></button>
       </div>
       {popupText && (
         <div role="status" className="clay-card absolute inset-x-3 bottom-8 z-10 flex items-center gap-2 !rounded-2xl px-4 py-2 text-sm font-bold sm:inset-x-auto sm:left-16 sm:max-w-sm">
