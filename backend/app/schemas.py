@@ -241,3 +241,27 @@ class ReportResolveIn(Strict):
 
 class ModerateIn(Strict):
     is_active: bool
+
+
+ListingKindT = Literal["sell", "gift", "service"]
+
+
+class ListingIn(Strict):
+    kind: ListingKindT
+    category: str = Field(min_length=2, max_length=32, pattern=r"^[a-z_]+$")
+    title: str = Field(min_length=3, max_length=120)
+    description: str = Field(default="", max_length=2000)
+    price: float | None = Field(default=None, ge=0, le=10_000_000)
+    condition: Literal["new", "like_new", "good", "fair"] | None = None
+    contact_phone: str | None = Field(default=None, pattern=PHONE_RE)
+
+
+class ListingUpdate(Strict):
+    title: str | None = Field(default=None, min_length=3, max_length=120)
+    description: str | None = Field(default=None, max_length=2000)
+    price: float | None = Field(default=None, ge=0, le=10_000_000)
+    status: Literal["available", "closed"] | None = None
+
+
+class ClaimIn(Strict):
+    message: str = Field(default="", max_length=500)

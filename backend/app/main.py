@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 from . import bootstrap
 from .config import get_settings
 from .db import SessionLocal, get_db
-from .routers import admin, ai, auth, community, incidents, matching, relationships, requests, triage, users
+from .routers import admin, ai, auth, community, incidents, marketplace, matching, relationships, requests, triage, users
 from .security import user_from_token
 from .services import orchestrator
 from .services.realtime import hub
@@ -81,7 +81,7 @@ def create_app() -> FastAPI:
         return JSONResponse(status_code=500, content={"detail": "Something went wrong on our side. Please try again."})
 
     for r in (auth.router, users.router, relationships.router, requests.router, matching.router, ai.router, incidents.router, triage.router,
-              community.router, admin.router):
+              community.router, marketplace.router, admin.router):
         app.include_router(r)
 
     @app.get("/api/health")

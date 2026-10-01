@@ -552,3 +552,58 @@ class RevokedToken(Base):
 
     jti: Mapped[str] = mapped_column(String(64), primary_key=True)
     expires_at: Mapped[datetime] = mapped_column(UTCDateTime)
+
+
+# ---- marketplace --------------------------------------------------------------------------
+class ListingKind:
+    SELL = "sell"          # item for sale
+    GIFT = "gift"          # free item given to a neighbour
+    SERVICE = "service"    # amenity / home service (pest control, plumbing, ...)
+    ALL = (SELL, GIFT, SERVICE)
+
+
+class ListingStatus:
+    AVAILABLE = "available"
+    RESERVED = "reserved"   # gift/item promised to someone
+    CLOSED = "closed"       # given away / sold / withdrawn
+    ACTIVE = (AVAILABLE, RESERVED)
+
+
+class Listing(Base):
+    __tablename__ = "listings"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    owner_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    kind: Mapped[str] = mapped_column(String(16), index=True)
+    category: Mapped[str] = mapped_column(String(32), index=True)
+    title: Mapped[str] = mapped_column(String(120))
+    description: Mapped[str] = mapped_column(Text, default="")
+    price: Mapped[float | None] = mapped_column(Float)          # INR; null for gifts / "quote on request" services
+    condition: Mapped[str | None] = mapped_column(String(16))   # new|like_new|good|fair (items only)
+    contact_phone: Mapped[str | None] = mapped_column(String(32))  # shown for services only
+    status: Mapped[str] = mapped_column(String(16), default=ListingStatus.AVAILABLE, index=True)
+    reserved_for_id: Mapped[int | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
+    lat: Mapped[float | None] = mapped_column(Float)
+    lng: Mapped[float | None] = mapped_column(Float)
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow, index=True)
+
+    owner: Mapped[User] = relationship(foreign_keys=[owner_id])
+    claims: Mapped[list["ListingClaim"]] = relationship(cascade="all, delete-orphan", order_by="ListingClaim.id")
+
+    __table_args__ = (Index("ix_listings_geo", "lat", "lng"),)
+
+
+class ListingClaim(Base):
+    """A neighbour's 'I'd like this' (gift/item) or 'enquiry' (service) on a listing."""
+    __tablename__ = "listing_claims"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    listing_id: Mapped[int] = mapped_column(ForeignKey("listings.id", ondelete="CASCADE"), index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    message: Mapped[str] = mapped_column(String(500), default="")
+    status: Mapped[str] = mapped_column(String(16), default="pending")  # pending|accepted|declined|withdrawn
+    created_at: Mapped[datetime] = mapped_column(UTCDateTime, default=utcnow)
+
+    user: Mapped[User] = relationship()
+
+    __table_args__ = (UniqueConstraint("listing_id", "user_id", name="uq_claim_once"),)

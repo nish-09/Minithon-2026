@@ -1,5 +1,5 @@
 "use client";
-import { Bell, BookOpen, Home, LogOut, Map as MapIcon, Menu, PanelLeftClose, PanelLeftOpen, PenLine, ShieldCheck, UserRound, Users, X } from "lucide-react";
+import { Bell, BookOpen, Home, LogOut, Map as MapIcon, Menu, Store, PanelLeftClose, PanelLeftOpen, PenLine, ShieldCheck, UserRound, Users, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
@@ -19,6 +19,7 @@ const NAV = [
   { href: "/request/new", label: "Ask for help", icon: PenLine },
   { href: "/radar", label: "Radar", icon: MapIcon },
   { href: "/circle", label: "Trusted Circle", icon: Users },
+  { href: "/marketplace", label: "Marketplace", icon: Store },
   { href: "/directory", label: "Directory", icon: BookOpen },
   { href: "/profile", label: "Profile", icon: UserRound },
 ];
@@ -276,7 +277,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {/* mobile tab bar */}
       <nav className="fixed inset-x-0 bottom-0 z-[1000] grid grid-cols-5 bg-surface pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_18px_rgb(92_110_140/0.18)] lg:hidden" aria-label="Primary">
-        {[NAV[0], NAV[1], NAV[2], NAV[3], NAV[5]].map((n) => (
+        {["/", "/request/new", "/radar", "/marketplace", "/profile"].map((h) => NAV.find((x) => x.href === h)!).map((n) => (
           <Link key={n.href} href={n.href} aria-current={active(n.href) ? "page" : undefined} className={cx("flex min-h-14 flex-col items-center justify-center gap-0.5 text-xs font-bold", active(n.href) ? "m-1 rounded-2xl bg-lavender text-ink" : "text-muted")}>
             <n.icon aria-hidden size={22} />
             {n.label === "Trusted Circle" ? "Circle" : n.label === "Ask for help" ? "Ask" : n.label}

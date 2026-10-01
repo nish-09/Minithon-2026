@@ -18,7 +18,7 @@ from . import bootstrap
 from .db import Base, SessionLocal, engine
 from .models import (
     Assignment, Certification, CommunityEvent, CreditTransaction, DirectoryEntry, HelpCredit,
-    HelpRequest, Incident, IncidentStep, Match, Message, Notification, Profile, Protocol,
+    HelpRequest, Incident, IncidentStep, Listing, Match, Message, Notification, Profile, Protocol,
     ProtocolStep, Relationship, RelationshipPreference, RelationshipType, RelStatus, Report,
     RequestCategory, RequestRecipient, RequestStatusHistory, Review, RevokedToken, Role, Skill,
     TrustEvent, TrustScore, User, UserCertification, UserSkill, Verification, utcnow,
@@ -559,6 +559,24 @@ def seed(db: Session, reset: bool = False) -> None:
         lat=offset(0.3, 0.5)[0], lng=offset(0.3, 0.5)[1],
         starts_at=utcnow() + timedelta(days=8), organizer_id=users["cousin"].id
     ))
+
+    # Marketplace: items for sale, free gifts, and local services/amenities
+    def add_listing(owner, kind, cat, title, desc, price=None, cond=None, phone=None, dx=0.0, dy=0.0, age_h=2):
+        lat, lng = offset(dx, dy)
+        db.add(Listing(owner_id=users[owner].id, kind=kind, category=cat, title=title, description=desc, price=price,
+                       condition=cond, contact_phone=phone, lat=round(lat, 3), lng=round(lng, 3),
+                       created_at=utcnow() - timedelta(hours=age_h)))
+
+    add_listing("mom", "gift", "furniture", "Wooden study table (free)", "Sturdy teak table, 4 ft. Pick up from Linking Road, you carry.", cond="good", dx=0.5, dy=0.5, age_h=3)
+    add_listing("priya", "gift", "books", "Class 10 and 12 textbooks, free", "CBSE Science and Maths sets. Happy to give them to a student who needs them.", cond="good", dx=0.6, dy=0.5, age_h=20)
+    add_listing("sneha", "gift", "plants", "Money plant and tulsi cuttings", "Rooted cuttings in pots, take as many as you like.", cond="new", dx=-0.9, dy=0.4, age_h=8)
+    add_listing("uncle", "sell", "appliances", "Prestige induction cooktop", "Used for a year, works perfectly. Original box.", price=1200, cond="like_new", dx=0.6, dy=-0.6, age_h=30)
+    add_listing("cousin", "sell", "electronics", "27-inch monitor", "Full HD IPS, HDMI cable included.", price=4500, cond="good", dx=-0.7, dy=0.6, age_h=12)
+    add_listing("kabir", "sell", "furniture", "Hand-built bookshelf", "Solid wood, 5 shelves. Can deliver within Bandra.", price=3200, cond="good", dx=-0.8, dy=-0.7, age_h=50)
+    add_listing("vikram", "service", "electrical", "Home wiring and fan installation", "Licensed electrician, 12 years' experience. Same-day visits in Bandra.", price=400, phone="+91 98200 22001", dx=0.8, dy=-0.5, age_h=70)
+    add_listing("rahul", "service", "pest_control", "Pest control: cockroach, termite, bed bugs", "Odourless gel and spray treatments, 3-month warranty. Free inspection.", price=999, phone="+91 98200 22002", dx=0.4, dy=0.0, age_h=40)
+    add_listing("dev", "service", "cleaning", "Deep home cleaning", "Kitchen, bathrooms and floors. Eco-friendly products.", price=1800, phone="+91 98200 22003", dx=0.0, dy=-0.3, age_h=90)
+    add_listing("kabir", "service", "carpentry", "Furniture repair and custom carpentry", "Hinges, drawers, wardrobes, and custom builds. Quotes on request.", phone="+91 98200 22004", dx=-0.8, dy=-0.7, age_h=60)
 
     db.commit()
     print(f"Seeded {len(users)} users centered at TSEC Bandra West, Mumbai.")

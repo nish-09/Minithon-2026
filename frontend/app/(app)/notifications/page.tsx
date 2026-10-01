@@ -13,6 +13,7 @@ function href(n: NotificationItem): string | null {
   if (n.data?.incident_id) return `/care/${n.data.incident_id}`;
   if (n.data?.request_id) return `/requests/${n.data.request_id}`;
   if (n.kind.startsWith("relationship")) return "/circle";
+  if (n.kind.startsWith("marketplace")) return "/marketplace";
   return null;
 }
 

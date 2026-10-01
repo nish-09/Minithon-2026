@@ -331,3 +331,33 @@ export interface Analytics {
   resource_gaps: { category: string; label: string; requests: number; available_helpers: number; ratio: number }[];
   heatmap: { lat: number; lng: number; weight: number; count: number }[];
 }
+
+export type ListingKind = "sell" | "gift" | "service";
+
+export interface ListingClaimItem {
+  id: number;
+  user: { id: number; name: string; verified: boolean };
+  message: string;
+  status: "pending" | "accepted" | "declined" | "withdrawn";
+  created_at: string;
+}
+
+export interface Listing {
+  id: number;
+  kind: ListingKind;
+  category: string;
+  title: string;
+  description: string;
+  price: number | null;
+  condition: string | null;
+  status: "available" | "reserved" | "closed";
+  created_at: string;
+  distance_km: number | null;
+  owner: { id: number; name: string; verified: boolean };
+  is_mine: boolean;
+  contact_phone: string | null;
+  my_claim: { id: number; status: string } | null;
+  reserved_for_me: boolean;
+  claim_count: number | null;
+  claims?: ListingClaimItem[];
+}
